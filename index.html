@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Frete — Barreto Transportes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f5f6fa;
+    color: #1a1d27;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container { width: 100%; max-width: 660px; }
+
+  .header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.8rem;
+  }
+  .logo-icon {
+    width: 46px; height: 46px; background: #2563eb;
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .logo-icon svg { width: 26px; height: 26px; fill: white; }
+  .header-text h1 {
+    font-size: 1.15rem; font-weight: 700;
+    color: #111827; letter-spacing: -0.02em;
+  }
+  .header-text p { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+
+  .card {
+    background: #ffffff; border: 1px solid #e5e7eb;
+    border-radius: 14px; padding: 1.4rem 1.5rem; margin-bottom: 1rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: #9ca3af; margin-bottom: 0.8rem;
+  }
+
+  .field-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 0.8rem; position: relative;
+  }
+  .field-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .field-icon.origin { background: #dbeafe; }
+  .field-icon.destination { background: #dcfce7; }
+  .connector-line {
+    position: absolute; left: 17px; top: 42px;
+    width: 2px; height: 12px; background: #e5e7eb;
+  }
+
+  input[type="text"], select {
+    flex: 1; height: 42px; background: #f9fafb;
+    border: 1px solid #e5e7eb; border-radius: 8px;
+    color: #111827; font-size: 0.9rem; padding: 0 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none; font-family: inherit; width: 100%;
+  }
+  input:focus, select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    background: #fff;
+  }
+  input::placeholder { color: #9ca3af; }
+  select { cursor: pointer; }
+
+  .route-fields { margin-bottom: 1.2rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+
+  .field-group label {
+    display: block; font-size: 0.72rem; font-weight: 600;
+    color: #6b7280; margin-bottom: 5px; letter-spacing: 0.02em;
+  }
+  .field-group input, .field-group select { height: 40px; font-size: 0.85rem; }
+
+  .divider { height: 1px; background: #f3f4f6; margin: 1.2rem 0; }
+
+  .calc-btn {
+    width: 100%; height: 46px; background: #2563eb; color: white;
+    border: none; border-radius: 9px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; letter-spacing: -0.01em;
+    transition: background 0.15s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: inherit;
+  }
+  .calc-btn:hover { background: #1d4ed8; }
+  .calc-btn:active { transform: scale(0.99); }
+  .calc-btn:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; transform: none; }
+  .calc-btn svg { width: 18px; height: 18px; }
+
+  .result-card {
+    background: #ffffff; border: 1px solid #e5e7eb;
+    border-radius: 14px; padding: 1.4rem 1.5rem; display: none;
+  }
+
+  .result-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.2rem; padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .route-label { font-size: 0.92rem; font-weight: 600; color: #374151; }
+  .route-label .city-a { color: #2563eb; }
+  .route-label .city-b { color: #16a34a; }
+  .route-label .arrow { color: #9ca3af; margin: 0 6px; }
+  .status-badge {
+    font-size: 0.68rem; background: #eff6ff; color: #2563eb;
+    padding: 3px 10px; border-radius: 20px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    border: 1px solid #bfdbfe;
+  }
+
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin-bottom: 1.2rem;
+  }
+  .metric {
+    background: #f9fafb; border: 1px solid #f3f4f6;
+    border-radius: 10px; padding: 0.85rem 0.6rem; text-align: center;
+  }
+  .metric-value {
+    font-size: 1.2rem; font-weight: 700;
+    color: #111827; letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .metric-unit { font-size: 0.68rem; color: #9ca3af; font-weight: 500; }
+  .metric-label {
+    font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #9ca3af; margin-top: 5px; font-weight: 700;
+  }
+  .metric.pedagio-metric { background: #fefce8; border-color: #fde68a; }
+  .metric.pedagio-metric .metric-value { color: #78350f; }
+  .metric.pedagio-metric .metric-label { color: #a16207; }
+  .metric.pedagio-metric .metric-unit { color: #a16207; }
+
+  /* Destaque R$/t */
+  .piso-tonelada-box {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    border-radius: 12px; padding: 1.1rem 1.3rem;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .piso-tonelada-tag {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: rgba(255,255,255,0.7); margin-bottom: 4px;
+  }
+  .piso-tonelada-valor {
+    font-size: 2rem; font-weight: 800; color: #ffffff;
+    letter-spacing: -0.04em; line-height: 1;
+  }
+  .piso-tonelada-sub {
+    font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 4px;
+  }
+  .piso-tonelada-right { text-align: right; }
+  .cap-badge {
+    font-size: 0.72rem; background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 20px;
+    font-weight: 600; margin-bottom: 6px; display: inline-block;
+  }
+  .piso-total-label { font-size: 0.68rem; color: rgba(255,255,255,0.6); }
+  .piso-total-valor { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.85); }
+
+  .frete-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0; }
+  .frete-box { border-radius: 10px; padding: 1rem 1.1rem; }
+  .frete-box.piso { background: #fefce8; border: 1px solid #fde68a; }
+  .frete-box.praticado { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .frete-box-tag {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 6px;
+  }
+  .frete-box.piso .frete-box-tag { color: #92400e; }
+  .frete-box.praticado .frete-box-tag { color: #1e40af; }
+  .frete-box-value {
+    font-size: 1.3rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .frete-box.piso .frete-box-value { color: #78350f; }
+  .frete-box.praticado .frete-box-value { color: #1d4ed8; }
+  .frete-box-detail { font-size: 0.68rem; margin-top: 4px; line-height: 1.4; }
+  .frete-box.piso .frete-box-detail { color: #a16207; }
+  .frete-box.praticado .frete-box-detail { color: #3b82f6; }
+
+  .alerta-piso {
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+    font-size: 0.78rem; font-weight: 600; display: none; text-align: center;
+  }
+  .alerta-piso.ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .alerta-piso.baixo { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+  .pedagio-nota {
+    font-size: 0.7rem; color: #9ca3af; margin-top: 8px;
+    padding: 6px 10px; background: #fefce8; border-radius: 7px;
+    border: 1px solid #fde68a; display: none;
+  }
+
+  .error-msg {
+    background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: 10px; padding: 0.9rem 1.1rem;
+    color: #dc2626; font-size: 0.85rem; display: none; margin-top: 0.8rem;
+  }
+
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.6s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fonte-nota {
+    font-size: 0.68rem; color: #9ca3af; margin-top: 1rem;
+    text-align: center; line-height: 1.5;
+  }
+  .fonte-nota a { color: #2563eb; text-decoration: none; }
+  .fonte-nota a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 3h15v13H1zm15 4h4l3 3v6h-7V7zM5.5 17a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm13 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Calculadora de Frete</h1>
+      <p>Distância rodoviária · Pedágio automático · Piso mínimo ANTT (Res. 6.076/2026) · R$/tonelada</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Rota</div>
+    <div class="route-fields">
+      <div class="field-row">
+        <div class="field-icon origin">
+          <svg viewBox="0 0 24 24" fill="#2563eb" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+          </svg>
+        </div>
+        <input type="text" id="origem" placeholder="Cidade de origem (ex: Itapeva, SP)" />
+        <div class="connector-line"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-icon destination">
+          <svg viewBox="0 0 24 24" fill="#16a34a" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+          </svg>
+        </div>
+        <input type="text" id="destino" placeholder="Cidade de destino (ex: São Paulo, SP)" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Veículo e carga</div>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Tipo de carga</label>
+        <select id="tipoCarga">
+          <option value="geral">Carga Geral</option>
+          <option value="granelSolido">Granel Sólido</option>
+          <option value="granelLiquido">Granel Líquido</option>
+          <option value="frigorificada">Frigorificada / Aquecida</option>
+          <option value="neogranel">Neogranel</option>
+          <option value="conteinerizada">Conteinerizada</option>
+          <option value="perigosaGranel">Perigosa (granel sólido)</option>
+          <option value="perigosaGeral">Perigosa (carga geral)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Nº de eixos carregados</label>
+        <select id="numEixos" onchange="atualizarCapacidade()">
+          <option value="2">2 eixos (Toco)</option>
+          <option value="3">3 eixos (Truck)</option>
+          <option value="4">4 eixos</option>
+          <option value="5">5 eixos (Carreta simples)</option>
+          <option value="6" selected>6 eixos (Bi-trem / Carreta)</option>
+          <option value="7">7 eixos (Bi-trem longo)</option>
+          <option value="9">9 eixos (Rodotrem)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Capacidade de carga (toneladas)</label>
+        <input type="text" id="tonelagem" value="30" placeholder="ex: 30" />
+      </div>
+      <div class="field-group" style="display:flex; align-items:flex-end;">
+        <!-- espaço reservado para alinhar o botão -->
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Cotação praticada (opcional)</div>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label>R$/tonelada praticado</label>
+        <input type="text" id="cotacaoTon" placeholder="ex: 85,00" />
+      </div>
+      <div class="field-group" style="display:flex; align-items:flex-end;">
+        <button class="calc-btn" id="btnCalc" onclick="calcular()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          Calcular
+        </button>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="route-label" id="routeLabel">—</div>
+      <div class="status-badge">Calculado</div>
+    </div>
+
+    <!-- Métricas: agora com 4 células incluindo pedágio -->
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-value" id="distKm">—</div>
+        <div class="metric-unit">km</div>
+        <div class="metric-label">Distância</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="durHoras">—</div>
+        <div class="metric-unit">h</div>
+        <div class="metric-label">Tempo est.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="velMedia">—</div>
+        <div class="metric-unit">km/h</div>
+        <div class="metric-label">Vel. média</div>
+      </div>
+      <div class="metric pedagio-metric">
+        <div class="metric-value" id="pedagioValor">—</div>
+        <div class="metric-unit">R$</div>
+        <div class="metric-label">Pedágio</div>
+      </div>
+    </div>
+
+    <div class="pedagio-nota" id="pedagioNota"></div>
+
+    <!-- Destaque principal: R$/t mínimo -->
+    <div class="piso-tonelada-box">
+      <div>
+        <div class="piso-tonelada-tag">⚖ Piso mínimo ANTT — R$/tonelada</div>
+        <div class="piso-tonelada-valor" id="pisoTonelada">—</div>
+        <div class="piso-tonelada-sub" id="pisoToneladaSub">—</div>
+      </div>
+      <div class="piso-tonelada-right">
+        <div class="cap-badge" id="capBadge">— t</div>
+        <div class="piso-total-label">Piso total (viagem)</div>
+        <div class="piso-total-valor" id="pisoTotal">—</div>
+      </div>
+    </div>
+
+    <div class="frete-boxes">
+      <div class="frete-box piso">
+        <div class="frete-box-tag">Fórmula ANTT</div>
+        <div class="frete-box-value" id="pisoFormula">—</div>
+        <div class="frete-box-detail" id="pisoDetalhe">—</div>
+      </div>
+      <div class="frete-box praticado" id="boxPraticado" style="display:none;">
+        <div class="frete-box-tag">🚛 Cotação praticada</div>
+        <div class="frete-box-value" id="cotacaoTotalResult">—</div>
+        <div class="frete-box-detail" id="cotacaoDetalhe">—</div>
+      </div>
+    </div>
+
+    <div class="alerta-piso" id="alertaPiso"></div>
+
+    <div class="fonte-nota">
+      Piso calculado conforme <a href="https://anttlegis.antt.gov.br/action/ActionDatalegis.php?acao=abrirTextoAto&tipo=RES&numeroAto=00006076&seqAto=000&valorAno=2026&orgao=DG%2FANTT%2FMT&cod_modulo=623&cod_menu=9230" target="_blank">Resolução ANTT nº 6.076/2026</a> — Tabela A.
+      Pedágio via Google Routes API (estimativa). Capacidade por eixo: referência de mercado.
+    </div>
+  </div>
+
+</div>
+<script>
+const GOOGLE_KEY = 'AIzaSyAk_wJ0jAxN4jMJ6BoVB9BoRogVP8otTNQ';
+
+const CAPACIDADE = { 2:10, 3:14, 4:19, 5:27, 6:30, 7:35, 9:45 };
+
+const TABELA_ANTT = {
+  granelSolido:   { 2:{CCD:3.7123,CC:444.84}, 3:{CCD:4.7427,CC:533.36}, 4:{CCD:5.3672,CC:576.59}, 5:{CCD:6.1859,CC:642.10}, 6:{CCD:6.8058,CC:656.76}, 7:{CCD:7.4505,CC:792.30}, 9:{CCD:8.5300,CC:877.83} },
+  granelLiquido:  { 2:{CCD:3.7837,CC:455.84}, 3:{CCD:4.8350,CC:550.10}, 4:{CCD:5.5162,CC:600.27}, 5:{CCD:6.3480,CC:669.38}, 6:{CCD:6.9730,CC:685.45}, 7:{CCD:7.5842,CC:811.76}, 9:{CCD:8.6837,CC:902.80} },
+  frigorificada:  { 2:{CCD:4.3423,CC:502.29}, 3:{CCD:5.5387,CC:601.96}, 4:{CCD:6.3226,CC:663.16}, 5:{CCD:7.2435,CC:732.07}, 6:{CCD:7.9625,CC:745.94}, 7:{CCD:8.8534,CC:949.16}, 9:{CCD:10.0426,CC:1030.58} },
+  conteinerizada: {                            3:{CCD:4.7164,CC:526.13}, 4:{CCD:5.2975,CC:557.42}, 5:{CCD:6.1243,CC:625.16}, 6:{CCD:6.7426,CC:639.38}, 7:{CCD:7.4482,CC:791.67}, 9:{CCD:8.4497,CC:855.76} },
+  geral:          { 2:{CCD:3.6815,CC:436.39}, 3:{CCD:4.7062,CC:523.33}, 4:{CCD:5.3386,CC:568.72}, 5:{CCD:6.1604,CC:635.08}, 6:{CCD:6.7774,CC:648.95}, 7:{CCD:7.4902,CC:803.22}, 9:{CCD:8.5104,CC:872.44} },
+  neogranel:      { 2:{CCD:3.3488,CC:436.39}, 3:{CCD:4.7048,CC:522.93}, 4:{CCD:5.3649,CC:575.96}, 5:{CCD:6.1604,CC:635.08}, 6:{CCD:6.7774,CC:648.95}, 7:{CCD:7.4902,CC:803.22}, 9:{CCD:8.5104,CC:872.44} },
+  perigosaGranel: { 2:{CCD:4.4560,CC:587.98}, 3:{CCD:5.4960,CC:672.64}, 4:{CCD:6.1560,CC:720.08}, 5:{CCD:6.9747,CC:792.78}, 6:{CCD:7.5946,CC:806.10}, 7:{CCD:8.2569,CC:957.93}, 9:{CCD:9.3441,CC:1047.62} },
+  perigosaGeral:  { 2:{CCD:4.4186,CC:577.56}, 3:{CCD:5.4567,CC:661.98}, 4:{CCD:6.0853,CC:710.41}, 5:{CCD:6.9019,CC:783.32}, 6:{CCD:7.5219,CC:795.39}, 7:{CCD:8.1876,CC:951.08}, 9:{CCD:9.2547,CC:1038.48} },
+};
+
+function atualizarCapacidade() {
+  const eixos = parseInt(document.getElementById('numEixos').value);
+  const cap = CAPACIDADE[eixos];
+  if (cap) document.getElementById('tonelagem').value = cap;
+}
+
+function parseBR(val) {
+  return parseFloat((val || '0').toString().replace(',', '.')) || 0;
+}
+
+function brl(val) {
+  return 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function formatDuration(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  if (h === 0) return m + 'min';
+  if (m === 0) return h + 'h';
+  return h + 'h' + m + 'min';
+}
+
+async function calcularRota(origemTxt, destinoTxt) {
+  const url = `https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`;
+
+  const body = {
+    origin: { address: origemTxt + ', Brasil' },
+    destination: { address: destinoTxt + ', Brasil' },
+    travelMode: 'DRIVE',
+    routingPreference: 'TRAFFIC_UNAWARE',
+    extraComputations: ['TOLLS'],
+    routeModifiers: {
+      vehicleInfo: { emissionType: 'DIESEL' }
+    },
+    units: 'METRIC'
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration,routes.travelAdvisory.tollInfo'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = err?.error?.message || `Erro ${res.status}`;
+    throw new Error('Google Routes API: ' + msg);
+  }
+
+  const data = await res.json();
+  if (!data.routes?.length) throw new Error('Nenhuma rota encontrada entre as cidades informadas.');
+
+  const route = data.routes[0];
+  const km = Math.round(route.distanceMeters / 1000);
+  // duration vem como "123s"
+  const durSec = parseInt((route.duration || '0s').replace('s', ''));
+
+  // Pedágio
+  let pedagioValor = null;
+  let pedagioSemDados = false;
+  const tollInfo = route.travelAdvisory?.tollInfo;
+  if (tollInfo?.estimatedPrice?.length) {
+    // Pega o valor em BRL
+    const brlEntry = tollInfo.estimatedPrice.find(p => p.currencyCode === 'BRL');
+    if (brlEntry) {
+      // units (string) + nanos (int)
+      const units = parseFloat(brlEntry.units || '0');
+      const nanos = (brlEntry.nanos || 0) / 1e9;
+      pedagioValor = units + nanos;
+    } else if (tollInfo.estimatedPrice.length > 0) {
+      // outra moeda improvável, mas trata
+      const p = tollInfo.estimatedPrice[0];
+      pedagioValor = parseFloat(p.units || '0') + (p.nanos || 0) / 1e9;
+    }
+  } else if (tollInfo) {
+    // há pedágio mas sem valor estimado disponível
+    pedagioSemDados = true;
+  }
+
+  return { km, durSec, pedagioValor, pedagioSemDados };
+}
+
+async function calcular() {
+  const btn = document.getElementById('btnCalc');
+  const errorDiv = document.getElementById('errorMsg');
+  const resultCard = document.getElementById('resultCard');
+
+  errorDiv.style.display = 'none';
+  resultCard.style.display = 'none';
+
+  const origemTxt = document.getElementById('origem').value.trim();
+  const destinoTxt = document.getElementById('destino').value.trim();
+  if (!origemTxt || !destinoTxt) { mostrarErro('Preencha a origem e o destino.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Calculando...';
+
+  try {
+    const { km, durSec, pedagioValor, pedagioSemDados } = await calcularRota(origemTxt, destinoTxt);
+
+    // Header
+    document.getElementById('routeLabel').innerHTML =
+      `<span class="city-a">${origemTxt.split(',')[0]}</span><span class="arrow">→</span><span class="city-b">${destinoTxt.split(',')[0]}</span>`;
+
+    // Métricas
+    document.getElementById('distKm').textContent = km.toLocaleString('pt-BR');
+    document.getElementById('durHoras').textContent = formatDuration(durSec);
+    document.getElementById('velMedia').textContent = durSec > 0 ? Math.round(km / (durSec / 3600)) : '—';
+
+    // Pedágio
+    const pedagioEl = document.getElementById('pedagioValor');
+    const pedagioNota = document.getElementById('pedagioNota');
+    let pedagioFinal = 0;
+
+    if (pedagioValor !== null && pedagioValor > 0) {
+      pedagioFinal = pedagioValor;
+      pedagioEl.textContent = pedagioValor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+      pedagioNota.style.display = 'none';
+    } else if (pedagioSemDados) {
+      pedagioEl.textContent = '?';
+      pedagioNota.textContent = '⚠ Há pedágios nesta rota, mas o Google não retornou o valor estimado. Adicione manualmente se necessário.';
+      pedagioNota.style.display = 'block';
+    } else {
+      pedagioEl.textContent = '0';
+      pedagioNota.style.display = 'none';
+    }
+
+    // Piso ANTT
+    const tipoCarga = document.getElementById('tipoCarga').value;
+    const numEixos = parseInt(document.getElementById('numEixos').value);
+    const tonelagem = parseBR(document.getElementById('tonelagem').value) || CAPACIDADE[numEixos] || 30;
+
+    const tabela = TABELA_ANTT[tipoCarga];
+    const coef = tabela?.[numEixos];
+
+    if (coef) {
+      const pisoBase = (km * coef.CCD) + coef.CC;
+      const pisoViagem = pisoBase + pedagioFinal;
+      const pisoTon = pisoViagem / tonelagem;
+
+      document.getElementById('pisoTonelada').textContent = brl(pisoTon);
+      document.getElementById('pisoToneladaSub').textContent =
+        `${brl(pisoViagem)} ÷ ${tonelagem.toLocaleString('pt-BR')} t` +
+        (pedagioFinal > 0 ? ` (incl. ${brl(pedagioFinal)} pedágio)` : '');
+      document.getElementById('capBadge').textContent = tonelagem.toLocaleString('pt-BR') + ' t';
+      document.getElementById('pisoTotal').textContent = brl(pisoViagem);
+
+      document.getElementById('pisoFormula').textContent = brl(pisoBase);
+      document.getElementById('pisoDetalhe').innerHTML =
+        `${km.toLocaleString('pt-BR')} km × R$${coef.CCD.toFixed(4).replace('.',',')} + R$${coef.CC.toFixed(2).replace('.',',')}`;
+
+      // Cotação praticada
+      const cotacaoTon = parseBR(document.getElementById('cotacaoTon').value);
+      const boxPraticado = document.getElementById('boxPraticado');
+      const alertaPiso = document.getElementById('alertaPiso');
+
+      if (cotacaoTon > 0) {
+        const cotacaoTotal = cotacaoTon * tonelagem;
+        document.getElementById('cotacaoTotalResult').textContent = brl(cotacaoTon) + '/t';
+        document.getElementById('cotacaoDetalhe').textContent =
+          `Total: ${brl(cotacaoTotal)} (${tonelagem.toLocaleString('pt-BR')} t)`;
+        boxPraticado.style.display = 'block';
+
+        alertaPiso.style.display = 'block';
+        if (cotacaoTotal >= pisoViagem) {
+          const pct = (((cotacaoTotal / pisoViagem) - 1) * 100).toFixed(1).replace('.',',');
+          alertaPiso.textContent = `✓ Cotação acima do piso ANTT em ${pct}% (${brl(cotacaoTotal - pisoViagem)})`;
+          alertaPiso.className = 'alerta-piso ok';
+        } else {
+          const diffTotal = brl(pisoViagem - cotacaoTotal);
+          const diffTon = brl((pisoViagem - cotacaoTotal) / tonelagem);
+          alertaPiso.textContent = `⚠ Cotação abaixo do piso ANTT em ${diffTotal} (${diffTon}/t) — risco de multa`;
+          alertaPiso.className = 'alerta-piso baixo';
+        }
+      } else {
+        boxPraticado.style.display = 'none';
+        alertaPiso.style.display = 'none';
+      }
+    } else {
+      document.getElementById('pisoTonelada').textContent = '—';
+      document.getElementById('pisoToneladaSub').textContent = 'Combinação não prevista na tabela ANTT';
+      document.getElementById('capBadge').textContent = tonelagem + ' t';
+      document.getElementById('pisoTotal').textContent = '—';
+      document.getElementById('pisoFormula').textContent = '—';
+      document.getElementById('pisoDetalhe').textContent = 'Sem coeficientes para esta combinação';
+    }
+
+    resultCard.style.display = 'block';
+
+  } catch(e) {
+    mostrarErro(e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Calcular`;
+  }
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') calcular(); });
+</script>
+</body>
+</html>
