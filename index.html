@@ -254,7 +254,7 @@
     </div>
     <div class="header-text">
       <h1>Calculadora de Frete</h1>
-      <p>Distância rodoviária · Pedágio por eixo · Piso mínimo ANTT (Res. 6.076/2026) · R$/tonelada</p>
+      <p>Distância rodoviária · Pedágio automático · Piso mínimo ANTT (Res. 6.076/2026) · R$/tonelada</p>
     </div>
   </div>
 
@@ -327,7 +327,7 @@
     <div class="grid-2">
       <div class="field-group">
         <label>R$/tonelada praticado</label>
-        <input type="text" id="cotacaoTon" placeholder="ex: 85,00" />
+        <input type="text" id="cotacaoTon" placeholder="R$ 0,00" inputmode="numeric" />
       </div>
       <div class="field-group" style="display:flex; align-items:flex-end;">
         <button class="calc-btn" id="btnCalc" onclick="calcular()">
@@ -404,7 +404,7 @@
 
     <div class="fonte-nota">
       Piso calculado conforme <a href="https://anttlegis.antt.gov.br/action/ActionDatalegis.php?acao=abrirTextoAto&tipo=RES&numeroAto=00006076&seqAto=000&valorAno=2026&orgao=DG%2FANTT%2FMT&cod_modulo=623&cod_menu=9230" target="_blank">Resolução ANTT nº 6.076/2026</a> — Tabela A.
-      Pedágio via Google Routes API considerando número de eixos. Capacidade por eixo: referência de mercado.
+      Pedágio estimado via Google Routes API (veículo diesel). Capacidade por eixo: referência de mercado.
     </div>
   </div>
 
@@ -413,11 +413,6 @@
 <!-- Google Maps JS (Places Autocomplete) -->
 <script>
   const GOOGLE_KEY = 'AIzaSyAk_wJ0jAxN4jMJ6BoVB9BoRogVP8otTNQ';
-
-  // Mapa de eixos → axleCount para a Routes API
-  // A API usa eixos totais do veículo (incluindo dianteiro)
-  // Convencão: eixos carregados + 1 dianteiro fixo
-  const EIXOS_AXLE = { 2:3, 3:4, 4:5, 5:6, 6:7, 7:8, 9:10 };
 
   const CAPACIDADE = { 2:10, 3:14, 4:19, 5:27, 6:30, 7:35, 9:45 };
 
@@ -470,8 +465,42 @@
   }
 
   function parseBR(val) {
-    return parseFloat((val || '0').toString().replace(',', '.')) || 0;
+    // Remove R$, pontos de milhar e troca vírgula por ponto
+    const limpo = (val || '0').toString()
+      .replace(/R\$\s*/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    return parseFloat(limpo) || 0;
   }
+
+  function aplicarMascaraContabil(input) {
+    input.addEventListener('input', function () {
+      // Extrai apenas dígitos
+      let digits = this.value.replace(/\D/g, '');
+      if (!digits) { this.value = ''; return; }
+      // Formata como centavos: últimos 2 dígitos = centavos
+      let cents = parseInt(digits, 10);
+      let reais = cents / 100;
+      this.value = 'R$ ' + reais.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    });
+
+    input.addEventListener('focus', function () {
+      // Ao focar, move cursor para o final
+      const len = this.value.length;
+      setTimeout(() => this.setSelectionRange(len, len), 0);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      // Permite apenas: dígitos, backspace, delete, tab, setas
+      const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+      if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
+    });
+  }
+
+  // Inicializa máscaras após DOM carregar
+  document.addEventListener('DOMContentLoaded', function () {
+    aplicarMascaraContabil(document.getElementById('cotacaoTon'));
+  });
 
   function brl(val) {
     return 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -497,8 +526,6 @@
       ? { placeId: destinoPlaceId }
       : { address: destinoInput + ', Brasil' };
 
-    const axleCount = EIXOS_AXLE[numEixos] || 7;
-
     const body = {
       origin,
       destination,
@@ -508,14 +535,10 @@
       routeModifiers: {
         vehicleInfo: {
           emissionType: 'DIESEL'
-        },
-        tollPasses: []
+        }
       },
       units: 'METRIC'
     };
-
-    // axleCount vai no body raiz conforme documentação Routes API v2
-    body.routeModifiers.vehicleInfo.axleCount = axleCount;
 
     const res = await fetch(
       `https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`,
