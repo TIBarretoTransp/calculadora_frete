@@ -276,7 +276,13 @@ select { cursor: pointer; }
     </div>
     <div class="field-group">
       <label>ICMS (%)</label>
-      <input type="text" id="icms" value="0" placeholder="auto ou manual" />
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" id="icms" value="0,00%" placeholder="0,00%" style="flex:1;" />
+        <button id="btnDiferimento" onclick="toggleDiferimento()" title="Diferimento de ICMS"
+          style="height:40px;padding:0 10px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;color:#6b7280;font-size:0.72rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;">
+          Diferimento
+        </button>
+      </div>
     </div>
   </div>
   <div class="aviso" id="avisoIcms"></div>
@@ -303,7 +309,7 @@ select { cursor: pointer; }
     </div>
     <div class="field-group">
       <label>Margem desejada (%)</label>
-      <input type="text" id="margem" value="15" />
+      <input type="text" id="margem" value="15,0%" />
     </div>
   </div>
 
@@ -330,11 +336,11 @@ select { cursor: pointer; }
   <div class="grid-2">
     <div class="field-group">
       <label>CV com crédito PIS/COFINS (R$/km)</label>
-      <input type="text" id="cvCredito" value="1,20" />
+      <input type="text" id="cvCredito" value="R$ 1,20" />
     </div>
     <div class="field-group">
       <label>CV sem crédito PIS/COFINS (R$/km)</label>
-      <input type="text" id="cvSemCredito" value="0,53" />
+      <input type="text" id="cvSemCredito" value="R$ 0,53" />
     </div>
   </div>
   <div class="divider"></div>
@@ -342,11 +348,11 @@ select { cursor: pointer; }
   <div class="grid-2">
     <div class="field-group">
       <label>CF com crédito PIS/COFINS (R$/mês)</label>
-      <input type="text" id="cfCredito" value="0,00" inputmode="numeric" />
+      <input type="text" id="cfCredito" value="R$ 0,00" inputmode="numeric" />
     </div>
     <div class="field-group">
       <label>CF sem crédito PIS/COFINS (R$/mês)</label>
-      <input type="text" id="cfSemCredito" value="15.000,00" inputmode="numeric" />
+      <input type="text" id="cfSemCredito" value="R$ 15.000,00" inputmode="numeric" />
     </div>
   </div>
   <div class="divider"></div>
@@ -385,15 +391,15 @@ select { cursor: pointer; }
   <div class="grid-3">
     <div class="field-group">
       <label>Comissão motorista (%)</label>
-      <input type="text" id="comissao" value="12" />
+      <input type="text" id="comissao" value="12,0%" />
     </div>
     <div class="field-group">
       <label>PIS/COFINS débito (%)</label>
-      <input type="text" id="piscofinsPct" value="9,25" />
+      <input type="text" id="piscofinsPct" value="9,25%" />
     </div>
     <div class="field-group">
       <label>Combustível (R$/L)</label>
-      <input type="text" id="combLitro" value="7,80" />
+      <input type="text" id="combLitro" value="R$ 7,80" />
     </div>
   </div>
   <div class="grid-2">
@@ -534,6 +540,9 @@ select { cursor: pointer; }
       </div>
     </div>
 
+    <!-- Alerta piso na precificação -->
+    <div class="alerta" id="alertaPisoPrec" style="margin-bottom:.8rem;"></div>
+
     <!-- Decomposição -->
     <div class="prec-bloco">
       <div class="prec-titulo">Composição de custos</div>
@@ -610,7 +619,10 @@ let cenarioSelecionado=2; // índice do cenário ativo (padrão: Razoável)
 let cachedRoute=null, cachedParams=null, cachedKm=0, cachedDurSec=0;
 
 // ── Helpers ──
-function parseBR(v){ return parseFloat((v||'0').toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0; }
+function parseBR(v){
+  const s=(v||'0').toString().replace(/R\$\s*/g,'').replace(/%/g,'').replace(/\./g,'').replace(',','.');
+  return parseFloat(s)||0;
+}
 function brl(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function pctFmt(v){ return v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'; }
 
@@ -628,7 +640,8 @@ function formatHoras(h){
   return hh+'h'+mm+'min';
 }
 
-function aplicarMascara(id){
+// Máscara contábil R$
+function aplicarMascaraBRL(id){
   const el=document.getElementById(id); if(!el) return;
   el.addEventListener('input',function(){
     let d=this.value.replace(/\D/g,'');
@@ -641,8 +654,51 @@ function aplicarMascara(id){
   });
 }
 
+// Máscara percentual %
+function aplicarMascaraPCT(id){
+  const el=document.getElementById(id); if(!el) return;
+  el.addEventListener('input',function(){
+    let d=this.value.replace(/\D/g,'');
+    if(!d){this.value='';return;}
+    const val=parseInt(d,10)/100;
+    this.value=val.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2})+'%';
+  });
+  el.addEventListener('keydown',function(e){
+    const ok=['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+    if(!ok.includes(e.key)&&!/^\d$/.test(e.key)) e.preventDefault();
+  });
+}
+
+let diferimentoAtivo=false;
+let icmsAntesDiferimento='0,0%';
+
+function toggleDiferimento(){
+  diferimentoAtivo=!diferimentoAtivo;
+  const btn=document.getElementById('btnDiferimento');
+  const campo=document.getElementById('icms');
+  if(diferimentoAtivo){
+    icmsAntesDiferimento=campo.value;
+    campo.value='0,0%';
+    campo.disabled=true;
+    campo.style.background='#f3f4f6';
+    campo.style.color='#9ca3af';
+    btn.style.background='#2563eb';
+    btn.style.borderColor='#2563eb';
+    btn.style.color='#fff';
+  } else {
+    campo.value=icmsAntesDiferimento;
+    campo.disabled=false;
+    campo.style.background='';
+    campo.style.color='';
+    btn.style.background='';
+    btn.style.borderColor='';
+    btn.style.color='';
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
-  ['pedagioEixo','pedagioTotalInput','precoMercado'].forEach(aplicarMascara);
+  ['pedagioEixo','pedagioTotalInput','precoMercado','cvCredito','cvSemCredito','cfCredito','cfSemCredito','combLitro'].forEach(aplicarMascaraBRL);
+  ['margem','comissao','piscofinsPct','icms'].forEach(aplicarMascaraPCT);
 });
 
 // ── UI ──
@@ -945,6 +1001,24 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
     {l:'> 22% — Excelente',c:'sem-excel',a:mr>=22},
   ];
   document.getElementById('semaforo').innerHTML=faixas.map(f=>`<div class="sem-item ${f.c}${f.a?' sem-atual':''}">${f.l}</div>`).join('');
+
+  // Alerta de piso mínimo na aba de precificação
+  const apPrec=document.getElementById('alertaPisoPrec');
+  const pisoViagemAtual=window._pisoViagem||0;
+  const nossaReceitaTotal=calc.receitaComIcms+(pedagioTipo==='vpo'?params.pedagio:0);
+  if(pisoViagemAtual>0){
+    apPrec.style.display='block';
+    if(nossaReceitaTotal<pisoViagemAtual){
+      apPrec.textContent='🚨 ATENÇÃO: Preço abaixo do piso mínimo ANTT — sujeito a multa. Ajuste a margem ou revise os parâmetros.';
+      apPrec.className='alerta warn';
+      apPrec.style.fontSize='.85rem';
+      apPrec.style.fontWeight='800';
+    } else {
+      apPrec.style.display='none';
+    }
+  } else {
+    apPrec.style.display='none';
+  }
 }
 
 function renderSensibilidade(km,durSec,params,retVazioFrac){
@@ -1074,6 +1148,7 @@ async function calcular(){
       pisoViagem=pisoBase+pedagio;
       pisoTon=pisoViagem/pesoEmb;
     }
+    window._pisoViagem=pisoViagem; // disponível para alerta na aba precificação
 
     // Label rota
     const routeHtml=`<span class="city-a">${origemLabel}</span><span class="arrow">→</span><span class="city-b">${destinoLabel}</span>`;
