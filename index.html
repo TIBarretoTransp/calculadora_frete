@@ -294,14 +294,14 @@ select { cursor: pointer; }
       <div class="field-icon origin">
         <svg viewBox="0 0 24 24" fill="#2563eb" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
       </div>
-      <input type="text" id="origem" placeholder="Cidade de origem" autocomplete="off" />
+      <input type="text" id="origem" placeholder="Cidade, endereço ou -23.5489, -46.6388" autocomplete="off" />
       <div class="connector-line"></div>
     </div>
     <div class="field-row">
       <div class="field-icon destination">
         <svg viewBox="0 0 24 24" fill="#16a34a" width="18" height="18"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
       </div>
-      <input type="text" id="destino" placeholder="Cidade de destino" autocomplete="off" />
+      <input type="text" id="destino" placeholder="Cidade, endereço ou -22.9068, -43.1729" autocomplete="off" />
     </div>
   </div>
 
@@ -652,29 +652,62 @@ function atualizarIcms(){
   } else { av.style.display='none'; }
 }
 
+function parseCoordenadas(txt){
+  // Aceita formatos: "-23.5489, -46.6388" / "-23.5489 -46.6388" / "-23.5489;-46.6388"
+  const match = txt.trim().match(/^(-?\d{1,3}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/);
+  if(!match) return null;
+  const lat = parseFloat(match[1].replace(',','.'));
+  const lng = parseFloat(match[2].replace(',','.'));
+  if(isNaN(lat)||isNaN(lng)) return null;
+  if(lat<-90||lat>90||lng<-180||lng>180) return null;
+  return {latitude:lat, longitude:lng};
+}
+
+function buildWaypoint(txt, placeId){
+  const coords = parseCoordenadas(txt);
+  if(coords) return {location:{latLng:coords}};
+  if(placeId) return {placeId};
+  return {address: txt + (txt.toLowerCase().includes('brasil') ? '' : ', Brasil')};
+}
+
 function initAutocomplete(){
-  const opts={types:['(cities)'],componentRestrictions:{country:'br'},fields:['place_id','name','formatted_address']};
+  // Sem restrição de tipo — aceita endereços completos além de cidades
+  const opts={componentRestrictions:{country:'br'},fields:['place_id','name','formatted_address']};
+
   const acO=new google.maps.places.Autocomplete(document.getElementById('origem'),opts);
   acO.addListener('place_changed',()=>{
     const p=acO.getPlace(); origemPlaceId=p.place_id||null;
     origemUF=inferirUF(p.formatted_address||''); atualizarIcms(); cachedRoute=null;
   });
+
   const acD=new google.maps.places.Autocomplete(document.getElementById('destino'),opts);
   acD.addListener('place_changed',()=>{
     const p=acD.getPlace(); destinoPlaceId=p.place_id||null;
     destinoUF=inferirUF(p.formatted_address||''); atualizarIcms(); cachedRoute=null;
   });
-  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;origemUF=null;cachedRoute=null;});
-  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;destinoUF=null;cachedRoute=null;});
+
+  // Se o usuário editar manualmente, limpa o place_id
+  // Mas NÃO limpa se parecer coordenadas — deixa passar direto
+  document.getElementById('origem').addEventListener('input',()=>{
+    origemPlaceId=null; origemUF=null; cachedRoute=null;
+  });
+  document.getElementById('destino').addEventListener('input',()=>{
+    destinoPlaceId=null; destinoUF=null; cachedRoute=null;
+  });
 }
 
 // ── API ──
 async function getRoute(){
   if(cachedRoute) return cachedRoute;
-  const origemTxt=document.getElementById('origem').value.trim();
-  const destinoTxt=document.getElementById('destino').value.trim();
-  const origin=origemPlaceId?{placeId:origemPlaceId}:{address:origemTxt+', Brasil'};
-  const destination=destinoPlaceId?{placeId:destinoPlaceId}:{address:destinoTxt+', Brasil'};
+  const origemTxt  = document.getElementById('origem').value.trim();
+  const destinoTxt = document.getElementById('destino').value.trim();
+
+  const origin      = buildWaypoint(origemTxt,  origemPlaceId);
+  const destination = buildWaypoint(destinoTxt, destinoPlaceId);
+
+  // Aviso visual se coordenadas detectadas
+  const origemCoords  = parseCoordenadas(origemTxt);
+  const destinoCoords = parseCoordenadas(destinoTxt);
   const res=await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`,{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Goog-FieldMask':'routes.distanceMeters,routes.duration'},
@@ -682,9 +715,22 @@ async function getRoute(){
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('Google Routes: '+(e?.error?.message||`Erro ${res.status}`));}
   const data=await res.json();
-  if(!data.routes?.length) throw new Error('Rota não encontrada entre as cidades informadas.');
+  if(!data.routes?.length) throw new Error('Rota não encontrada entre os pontos informados.');
   const r=data.routes[0];
-  cachedRoute={km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s',''))};
+
+  // Labels para exibição — usa "Lat/Lng" quando forem coordenadas
+  const origemLabel  = origemCoords
+    ? `${origemCoords.latitude.toFixed(4)}, ${origemCoords.longitude.toFixed(4)}`
+    : origemTxt.split(',')[0];
+  const destinoLabel = destinoCoords
+    ? `${destinoCoords.latitude.toFixed(4)}, ${destinoCoords.longitude.toFixed(4)}`
+    : destinoTxt.split(',')[0];
+
+  cachedRoute={
+    km: Math.round(r.distanceMeters/1000),
+    durSec: parseInt((r.duration||'0s').replace('s','')),
+    origemLabel, destinoLabel
+  };
   return cachedRoute;
 }
 
@@ -791,7 +837,7 @@ async function calcular(){
   btn.innerHTML='<span class="spinner"></span> Calculando...';
 
   try{
-    const {km,durSec}=await getRoute();
+    const {km,durSec,origemLabel,destinoLabel}=await getRoute();
 
     // Parâmetros
     const numEixos   =parseInt(document.getElementById('numEixos').value);
@@ -840,8 +886,7 @@ async function calcular(){
     }
 
     // Label rota
-    const c1=origemTxt.split(',')[0], c2=destinoTxt.split(',')[0];
-    const routeHtml=`<span class="city-a">${c1}</span><span class="arrow">→</span><span class="city-b">${c2}</span>`;
+    const routeHtml=`<span class="city-a">${origemLabel}</span><span class="arrow">→</span><span class="city-b">${destinoLabel}</span>`;
     ['routeLabel1','routeLabel2','routeLabel3'].forEach(id=>document.getElementById(id).innerHTML=routeHtml);
 
     // Tempo operação
