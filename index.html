@@ -15,7 +15,6 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f6fa; colo
 .header-text h1 { font-size: 1.15rem; font-weight: 700; color: #111827; letter-spacing: -0.02em; }
 .header-text p { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
 
-/* Nav tabs (premissas / cotação) */
 .main-tabs { display: flex; gap: 0; margin-bottom: 0; border-radius: 14px 14px 0 0; overflow: hidden; }
 .main-tab { flex: 1; padding: 0.9rem; text-align: center; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #e5e7eb; color: #6b7280; border: none; font-family: inherit; transition: all .15s; text-transform: uppercase; letter-spacing: .05em; }
 .main-tab.active { background: #fff; color: #111827; }
@@ -86,7 +85,6 @@ select { cursor: pointer; }
 .metric-unit { font-size: .68rem; color: #9ca3af; }
 .metric-label { font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; color: #9ca3af; margin-top: 5px; font-weight: 700; }
 
-/* Piso ANTT box */
 .hero-box { border-radius: 12px; padding: 1.1rem 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
 .hero-box.blue { background: linear-gradient(135deg,#1d4ed8,#2563eb); }
 .hero-box.green { background: linear-gradient(135deg,#064e3b,#065f46); }
@@ -107,24 +105,64 @@ select { cursor: pointer; }
 .mini-box.yellow { background: #fefce8; border: 1px solid #fde68a; }
 .mini-box.sky { background: #eff6ff; border: 1px solid #bfdbfe; }
 .mini-box.slate { background: #f8fafc; border: 1px solid #e2e8f0; }
+.mini-box.red { background: #fef2f2; border: 1px solid #fecaca; }
+.mini-box.green { background: #f0fdf4; border: 1px solid #bbf7d0; }
 .mini-tag { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
 .mini-box.yellow .mini-tag { color: #92400e; }
 .mini-box.sky .mini-tag { color: #1e40af; }
 .mini-box.slate .mini-tag { color: #475569; }
+.mini-box.red .mini-tag { color: #dc2626; }
+.mini-box.green .mini-tag { color: #15803d; }
 .mini-val { font-size: 1.2rem; font-weight: 700; letter-spacing: -.03em; }
 .mini-box.yellow .mini-val { color: #78350f; }
 .mini-box.sky .mini-val { color: #1d4ed8; }
 .mini-box.slate .mini-val { color: #1e293b; }
+.mini-box.red .mini-val { color: #dc2626; }
+.mini-box.green .mini-val { color: #15803d; }
 .mini-det { font-size: .68rem; margin-top: 4px; line-height: 1.4; }
 .mini-box.yellow .mini-det { color: #a16207; }
 .mini-box.sky .mini-det { color: #3b82f6; }
 .mini-box.slate .mini-det { color: #64748b; }
+.mini-box.red .mini-det { color: #ef4444; }
+.mini-box.green .mini-det { color: #16a34a; }
 
 .alerta { margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: .78rem; font-weight: 600; display: none; text-align: center; }
 .alerta.ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 .alerta.warn { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
 
-/* Decomposição de custos */
+/* Mercado comparativo */
+.mercado-box { border-radius: 12px; padding: 1.1rem 1.3rem; margin-bottom: 1rem; border: 2px solid; }
+.mercado-box.acima { background: #f0fdf4; border-color: #86efac; }
+.mercado-box.abaixo { background: #fef2f2; border-color: #fca5a5; }
+.mercado-box.igual { background: #fffbeb; border-color: #fde68a; }
+.mercado-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+.mercado-titulo { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.mercado-box.acima .mercado-titulo { color: #15803d; }
+.mercado-box.abaixo .mercado-titulo { color: #dc2626; }
+.mercado-box.igual .mercado-titulo { color: #92400e; }
+.mercado-icone { font-size: 1.4rem; }
+.mercado-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.mercado-item { text-align: center; }
+.mercado-item-label { font-size: .65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.mercado-item-val { font-size: 1rem; font-weight: 700; color: #111827; }
+.mercado-item-val.pos { color: #15803d; }
+.mercado-item-val.neg { color: #dc2626; }
+.mercado-recomenda { margin-top: .8rem; font-size: .78rem; font-weight: 600; padding: 6px 10px; border-radius: 7px; text-align: center; }
+.mercado-box.acima .mercado-recomenda { background: #dcfce7; color: #15803d; }
+.mercado-box.abaixo .mercado-recomenda { background: #fee2e2; color: #dc2626; }
+.mercado-box.igual .mercado-recomenda { background: #fef9c3; color: #92400e; }
+
+/* Cenários clicáveis */
+.cenarios-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-bottom: 1rem; }
+.cenario-card { border-radius: 8px; padding: .6rem .4rem; text-align: center; border: 2px solid transparent; cursor: pointer; transition: all .15s; }
+.cenario-card:hover { transform: scale(1.03); }
+.cenario-card.selecionado { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.cenario-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 3px; }
+.cenario-prec { font-size: .95rem; font-weight: 800; color: #111827; }
+.cenario-margem { font-size: .65rem; margin-top: 2px; }
+.c0 { background: #f0fdf4; } .c25 { background: #f0fdf4; } .c50 { background: #fffbeb; } .c75 { background: #fff7ed; } .c100 { background: #fef2f2; }
+
+/* Decomposição */
 .custo-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: 1rem; }
 .custo-table tr { border-bottom: 1px solid #f3f4f6; }
 .custo-table tr:last-child { border-bottom: none; }
@@ -133,45 +171,34 @@ select { cursor: pointer; }
 .custo-table .row-label { color: #4b5563; }
 .custo-table .row-detalhe { color: #9ca3af; font-size: .7rem; display: block; }
 .custo-table .subtotal td { background: #f9fafb; font-weight: 700; color: #111827; }
-.custo-table .total-row td { background: #eff6ff; font-weight: 700; color: #1d4ed8; font-size: .88rem; }
-.custo-table .credito td { color: #15803d; }
-.custo-table .credito td:last-child { color: #15803d; }
+.custo-table .credito-row td { color: #15803d; }
 
 /* Semáforo */
 .semaforo { display: flex; gap: 6px; flex-wrap: wrap; margin-top: .8rem; }
 .sem-item { flex: 1; min-width: 110px; padding: 6px 8px; border-radius: 8px; font-size: .7rem; font-weight: 600; text-align: center; border: 1px solid; }
-.sem-ruim    { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-.sem-minimo  { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
-.sem-sauda   { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
-.sem-bom     { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-.sem-excel   { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
-.sem-atual   { font-weight: 800; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.sem-ruim   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.sem-minimo { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.sem-sauda  { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.sem-bom    { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.sem-excel  { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.sem-atual  { font-weight: 800; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 
 /* Sensibilidade */
 .sens-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
 .sens-table th { background: #f9fafb; padding: 7px 10px; text-align: center; font-weight: 700; color: #374151; border: 1px solid #e5e7eb; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
 .sens-table td { padding: 6px 10px; text-align: center; border: 1px solid #e5e7eb; color: #374151; }
-.sens-table .atual-row td { background: #eff6ff; font-weight: 700; color: #1d4ed8; }
+.sens-table .atual-row td { font-weight: 700; }
 .sens-good { background: #f0fdf4 !important; color: #15803d !important; }
 .sens-warn  { background: #fff7ed !important; color: #c2410c !important; }
 .sens-bad   { background: #fef2f2 !important; color: #dc2626 !important; }
+.sens-atual-cell { outline: 2px solid #2563eb !important; outline-offset: -2px; font-weight: 800 !important; }
 
-/* Cenários retorno */
-.cenarios-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-bottom: 1rem; }
-.cenario-card { border-radius: 8px; padding: .6rem .4rem; text-align: center; border: 2px solid transparent; cursor: default; }
-.cenario-card.atual { border-color: #2563eb; }
-.cenario-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 3px; }
-.cenario-prec { font-size: .95rem; font-weight: 800; color: #111827; }
-.cenario-margem { font-size: .65rem; color: #6b7280; margin-top: 2px; }
-.c0 { background: #f0fdf4; } .c25 { background: #f0fdf4; } .c50 { background: #fffbeb; } .c75 { background: #fff7ed; } .c100 { background: #fef2f2; }
-
+.prec-bloco { margin-bottom: 1.2rem; }
+.prec-titulo { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-bottom: .7rem; padding-bottom: .4rem; border-bottom: 1px solid #f3f4f6; }
 .fonte-nota { font-size: .68rem; color: #9ca3af; margin-top: 1rem; text-align: center; line-height: 1.5; }
 .fonte-nota a { color: #2563eb; text-decoration: none; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.prec-bloco { margin-bottom: 1.2rem; }
-.prec-titulo { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-bottom: .7rem; padding-bottom: .4rem; border-bottom: 1px solid #f3f4f6; }
 </style>
 </head>
 <body>
@@ -187,106 +214,14 @@ select { cursor: pointer; }
   </div>
 </div>
 
-<!-- ABAS PRINCIPAIS -->
+<!-- ABAS: COTAÇÃO primeiro, PREMISSAS segundo -->
 <div class="main-tabs">
-  <button class="main-tab active" onclick="showMain('premissas')">⚙ Premissas</button>
-  <button class="main-tab" onclick="showMain('cotacao')">🚛 Cotação</button>
-</div>
-
-<!-- PREMISSAS -->
-<div class="main-panel active" id="panelPremissas">
-
-  <div class="section-label">Custos variáveis (R$/km)</div>
-  <div class="grid-2">
-    <div class="field-group">
-      <label>CV com crédito PIS/COFINS (R$/km)</label>
-      <input type="text" id="cvCredito" value="1,20" />
-    </div>
-    <div class="field-group">
-      <label>CV sem crédito PIS/COFINS (R$/km)</label>
-      <input type="text" id="cvSemCredito" value="0,53" />
-    </div>
-  </div>
-
-  <div class="divider"></div>
-  <div class="section-label">Custos fixos mensais (R$/mês) — por caminhão</div>
-  <div class="grid-2">
-    <div class="field-group">
-      <label>CF com crédito PIS/COFINS (R$/mês)</label>
-      <input type="text" id="cfCredito" value="0,00" inputmode="numeric" />
-    </div>
-    <div class="field-group">
-      <label>CF sem crédito PIS/COFINS (R$/mês)</label>
-      <input type="text" id="cfSemCredito" value="15.000,00" inputmode="numeric" />
-    </div>
-  </div>
-
-  <div class="divider"></div>
-  <div class="section-label">Parâmetros de tempo</div>
-  <div class="info-box" id="infoTempoMode">Fonte do tempo de deslocamento: <strong>API Google</strong></div>
-  <div class="toggle-row">
-    <button class="toggle-btn active" id="btnAPI" onclick="setTempoMode('api')">Usar tempo da API</button>
-    <button class="toggle-btn" id="btnVelMedia" onclick="setTempoMode('vel')">Usar velocidade média</button>
-  </div>
-  <div class="grid-3">
-    <div class="field-group" id="campoVelMedia" style="display:none;">
-      <label>Velocidade média (km/h)</label>
-      <input type="text" id="velMedia" value="70" />
-    </div>
-    <div class="field-group">
-      <label>Dias úteis no mês</label>
-      <input type="text" id="diasUteis" value="22" />
-    </div>
-    <div class="field-group">
-      <label>Horas disponíveis/dia</label>
-      <input type="text" id="horasDia" value="11" />
-    </div>
-  </div>
-  <div class="grid-2">
-    <div class="field-group">
-      <label>Horas de carregamento (h)</label>
-      <input type="text" id="horasCarga" value="2" />
-    </div>
-    <div class="field-group">
-      <label>Horas de descarregamento (h)</label>
-      <input type="text" id="horasDescarga" value="2" />
-    </div>
-  </div>
-
-  <div class="divider"></div>
-  <div class="section-label">Parâmetros financeiros</div>
-  <div class="grid-3">
-    <div class="field-group">
-      <label>Comissão motorista (%)</label>
-      <input type="text" id="comissao" value="12" />
-    </div>
-    <div class="field-group">
-      <label>PIS/COFINS débito (%)</label>
-      <input type="text" id="piscofinsPct" value="9,25" />
-    </div>
-    <div class="field-group">
-      <label>Consumo carregado (km/L)</label>
-      <input type="text" id="consCarreg" value="1,7" />
-    </div>
-  </div>
-  <div class="grid-2">
-    <div class="field-group">
-      <label>Consumo vazio (km/L)</label>
-      <input type="text" id="consVazio" value="2,3" />
-    </div>
-    <div class="field-group">
-      <label>Combustível (R$/L)</label>
-      <input type="text" id="combLitro" value="7,80" />
-    </div>
-  </div>
-
-  <button class="calc-btn" style="background:#475569;" onclick="showMain('cotacao')">
-    Ir para cotação →
-  </button>
+  <button class="main-tab active" onclick="showMain('cotacao')">🚛 Cotação</button>
+  <button class="main-tab" onclick="showMain('premissas')">⚙ Premissas</button>
 </div>
 
 <!-- COTAÇÃO -->
-<div class="main-panel" id="panelCotacao">
+<div class="main-panel active" id="panelCotacao">
 
   <div class="section-label">Rota</div>
   <div class="route-fields">
@@ -323,7 +258,7 @@ select { cursor: pointer; }
     </div>
     <div class="field-group">
       <label>Nº de eixos carregados</label>
-      <select id="numEixos" onchange="atualizarCapacidade()">
+      <select id="numEixos" onchange="atualizarPeso()">
         <option value="2">2 eixos (Toco)</option>
         <option value="3">3 eixos (Truck)</option>
         <option value="4">4 eixos</option>
@@ -336,26 +271,23 @@ select { cursor: pointer; }
   </div>
   <div class="grid-2">
     <div class="field-group">
-      <label>Capacidade (t)</label>
-      <input type="text" id="tonelagem" value="30" />
-    </div>
-    <div class="field-group">
       <label>Peso embarcado (t)</label>
       <input type="text" id="pesoEmb" value="30" />
     </div>
+    <div class="field-group">
+      <label>ICMS (%)</label>
+      <input type="text" id="icms" value="0" placeholder="auto ou manual" />
+    </div>
   </div>
+  <div class="aviso" id="avisoIcms"></div>
 
   <div class="divider"></div>
   <div class="section-label">Pedágio</div>
-
   <div class="toggle-row">
     <button class="toggle-btn active" id="btnVPO" onclick="setPedagioTipo('vpo')">VPO — pago pelo embarcador</button>
     <button class="toggle-btn" id="btnEmbutido" onclick="setPedagioTipo('embutido')">Embutido no frete</button>
   </div>
-  <div class="info-box" id="infoPedagioTipo">
-    VPO: acrescido após o cálculo, fora do faturamento — sem impacto em PIS/COFINS ou comissão.
-  </div>
-
+  <div class="info-box" id="infoPedagioTipo">VPO: acrescido após o cálculo, fora do faturamento — sem impacto em PIS/COFINS ou comissão.</div>
   <div class="toggle-row" style="margin-top:.6rem;">
     <button class="toggle-btn active" id="btnPorEixo" onclick="setPedagioMode('eixo')">Por eixo (R$/eixo)</button>
     <button class="toggle-btn" id="btnPedTotal" onclick="setPedagioMode('total')">Valor total (R$)</button>
@@ -370,30 +302,111 @@ select { cursor: pointer; }
       <input type="text" id="pedagioTotalInput" placeholder="R$ 0,00" inputmode="numeric" />
     </div>
     <div class="field-group">
-      <label>ICMS (%)</label>
-      <input type="text" id="icms" value="0" placeholder="auto ou manual" />
-    </div>
-  </div>
-  <div class="aviso" id="avisoIcms"></div>
-
-  <div class="divider"></div>
-  <div class="section-label">Margem e preço de mercado</div>
-  <div class="grid-2">
-    <div class="field-group">
       <label>Margem desejada (%)</label>
       <input type="text" id="margem" value="15" />
     </div>
-    <div class="field-group">
-      <label>Preço de mercado (R$/t) — opcional</label>
-      <input type="text" id="precoMercado" placeholder="R$ 0,00" inputmode="numeric" />
-    </div>
   </div>
 
-  <button class="calc-btn" id="btnCalc" onclick="calcular()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    Calcular
-  </button>
+  <div class="divider"></div>
+  <div class="section-label">Preço de mercado (opcional)</div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>Preço de mercado (R$/t)</label>
+      <input type="text" id="precoMercado" placeholder="R$ 0,00" inputmode="numeric" />
+    </div>
+    <div class="field-group" style="display:flex;align-items:flex-end;">
+      <button class="calc-btn" id="btnCalc" onclick="calcular()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Calcular
+      </button>
+    </div>
+  </div>
   <div class="error-msg" id="errorMsg"></div>
+</div>
+
+<!-- PREMISSAS -->
+<div class="main-panel" id="panelPremissas">
+  <div class="section-label">Custos variáveis (R$/km)</div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>CV com crédito PIS/COFINS (R$/km)</label>
+      <input type="text" id="cvCredito" value="1,20" />
+    </div>
+    <div class="field-group">
+      <label>CV sem crédito PIS/COFINS (R$/km)</label>
+      <input type="text" id="cvSemCredito" value="0,53" />
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-label">Custos fixos mensais (R$/mês) — por caminhão</div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>CF com crédito PIS/COFINS (R$/mês)</label>
+      <input type="text" id="cfCredito" value="0,00" inputmode="numeric" />
+    </div>
+    <div class="field-group">
+      <label>CF sem crédito PIS/COFINS (R$/mês)</label>
+      <input type="text" id="cfSemCredito" value="15.000,00" inputmode="numeric" />
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-label">Parâmetros de tempo</div>
+  <div class="info-box" id="infoTempoMode">Fonte do tempo de deslocamento: <strong>API Google</strong></div>
+  <div class="toggle-row">
+    <button class="toggle-btn active" id="btnAPI" onclick="setTempoMode('api')">Usar tempo da API</button>
+    <button class="toggle-btn" id="btnVelMedia" onclick="setTempoMode('vel')">Usar velocidade média</button>
+  </div>
+  <div class="grid-3">
+    <div class="field-group" id="campoVelMedia" style="display:none;">
+      <label>Velocidade média (km/h)</label>
+      <input type="text" id="velMedia" value="70" />
+    </div>
+    <div class="field-group">
+      <label>Dias úteis no mês</label>
+      <input type="text" id="diasUteis" value="22" />
+    </div>
+    <div class="field-group">
+      <label>Horas disponíveis/dia</label>
+      <input type="text" id="horasDia" value="11" />
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>Horas de carregamento (h)</label>
+      <input type="text" id="horasCarga" value="2" />
+    </div>
+    <div class="field-group">
+      <label>Horas de descarregamento (h)</label>
+      <input type="text" id="horasDescarga" value="2" />
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-label">Parâmetros financeiros e consumo</div>
+  <div class="grid-3">
+    <div class="field-group">
+      <label>Comissão motorista (%)</label>
+      <input type="text" id="comissao" value="12" />
+    </div>
+    <div class="field-group">
+      <label>PIS/COFINS débito (%)</label>
+      <input type="text" id="piscofinsPct" value="9,25" />
+    </div>
+    <div class="field-group">
+      <label>Combustível (R$/L)</label>
+      <input type="text" id="combLitro" value="7,80" />
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>Consumo carregado (km/L)</label>
+      <input type="text" id="consCarreg" value="1,7" />
+    </div>
+    <div class="field-group">
+      <label>Consumo vazio (km/L)</label>
+      <input type="text" id="consVazio" value="2,3" />
+    </div>
+  </div>
+  <button class="calc-btn" style="background:#475569;" onclick="showMain('cotacao')">← Voltar para cotação</button>
 </div>
 
 <!-- RESULTADOS -->
@@ -412,8 +425,8 @@ select { cursor: pointer; }
     </div>
     <div class="metrics-3">
       <div class="metric"><div class="metric-value" id="rDistKm">—</div><div class="metric-unit">km</div><div class="metric-label">Distância</div></div>
-      <div class="metric"><div class="metric-value" id="rDuracao">—</div><div class="metric-unit">h</div><div class="metric-label">Tempo est.</div></div>
-      <div class="metric"><div class="metric-value" id="rTempoOp">—</div><div class="metric-unit">h</div><div class="metric-label">Tempo operação</div></div>
+      <div class="metric"><div class="metric-value" id="rDuracao">—</div><div class="metric-label">Tempo est.</div></div>
+      <div class="metric"><div class="metric-value" id="rTempoOp">—</div><div class="metric-label">Tempo operação</div></div>
     </div>
     <div class="hero-box blue">
       <div>
@@ -449,7 +462,6 @@ select { cursor: pointer; }
       <div class="route-label" id="routeLabel2">—</div>
       <span class="badge badge-green">Precificação</span>
     </div>
-
     <div class="hero-box green">
       <div>
         <div class="hero-tag">💰 Preço sugerido — R$/tonelada</div>
@@ -463,34 +475,66 @@ select { cursor: pointer; }
       </div>
     </div>
 
-    <!-- Cenários de retorno -->
+    <!-- Cenários clicáveis -->
     <div class="prec-bloco">
-      <div class="prec-titulo">Cenários de retorno — preço R$/t</div>
+      <div class="prec-titulo">Cenários de retorno — clique para selecionar</div>
       <div class="cenarios-grid" id="cenariosGrid"></div>
     </div>
 
-    <!-- Preço de mercado -->
-    <div class="two-boxes" id="boxMercado" style="display:none;">
-      <div class="mini-box sky">
-        <div class="mini-tag">Preço de mercado</div>
-        <div class="mini-val" id="mercadoVal">—</div>
-        <div class="mini-det" id="mercadoDet">—</div>
-      </div>
-      <div class="mini-box slate">
-        <div class="mini-tag">Ponto de equilíbrio</div>
-        <div class="mini-val" id="equilibrioVal">—</div>
-        <div class="mini-det" id="equilibrioDet">—</div>
-      </div>
-    </div>
-    <div class="two-boxes" id="boxEquilibrio" style="display:none;">
-      <div class="mini-box slate">
-        <div class="mini-tag">Ponto de equilíbrio (R$/t)</div>
-        <div class="mini-val" id="equilibrioVal2">—</div>
-        <div class="mini-det" id="equilibrioDet2">—</div>
+    <!-- Análise de mercado -->
+    <div id="boxMercado" style="display:none; margin-bottom:1rem;">
+      <div class="mercado-box" id="mercadoBox">
+        <div class="mercado-header">
+          <div class="mercado-titulo" id="mercadoTitulo">—</div>
+          <div class="mercado-icone" id="mercadoIcone">—</div>
+        </div>
+        <div class="mercado-grid">
+          <div class="mercado-item">
+            <div class="mercado-item-label">Preço mercado</div>
+            <div class="mercado-item-val" id="mercadoPreco">—</div>
+          </div>
+          <div class="mercado-item">
+            <div class="mercado-item-label">Nossa cotação</div>
+            <div class="mercado-item-val" id="mercadoNossa">—</div>
+          </div>
+          <div class="mercado-item">
+            <div class="mercado-item-label">Diferença</div>
+            <div class="mercado-item-val" id="mercadoDiff">—</div>
+          </div>
+          <div class="mercado-item">
+            <div class="mercado-item-label">Margem s/ mercado</div>
+            <div class="mercado-item-val" id="mercadoMargem">—</div>
+          </div>
+          <div class="mercado-item">
+            <div class="mercado-item-label">Equilíbrio</div>
+            <div class="mercado-item-val" id="mercadoEquil">—</div>
+          </div>
+          <div class="mercado-item">
+            <div class="mercado-item-label">Folga s/ equilíbrio</div>
+            <div class="mercado-item-val" id="mercadoFolga">—</div>
+          </div>
+        </div>
+        <div class="mercado-recomenda" id="mercadoRecomenda">—</div>
       </div>
     </div>
 
-    <!-- Decomposição de custos -->
+    <!-- Equilíbrio sem mercado -->
+    <div id="boxEquilibrio" style="display:none; margin-bottom:1rem;">
+      <div class="two-boxes">
+        <div class="mini-box slate">
+          <div class="mini-tag">Ponto de equilíbrio (R$/t)</div>
+          <div class="mini-val" id="equilibrioVal">—</div>
+          <div class="mini-det" id="equilibrioDet">—</div>
+        </div>
+        <div class="mini-box sky">
+          <div class="mini-tag">Folga acima do equilíbrio</div>
+          <div class="mini-val" id="folgaEquil">—</div>
+          <div class="mini-det" id="folgaEquilDet">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decomposição -->
     <div class="prec-bloco">
       <div class="prec-titulo">Composição de custos</div>
       <table class="custo-table" id="custoTable"></table>
@@ -510,24 +554,28 @@ select { cursor: pointer; }
       <span class="badge badge-blue">Sensibilidade</span>
     </div>
     <div class="prec-bloco">
-      <div class="prec-titulo">Preço R$/t × Peso embarcado × Margem</div>
+      <div class="prec-titulo" id="sensTitulo1">Preço R$/t × Peso embarcado × Margem</div>
       <div style="overflow-x:auto;"><table class="sens-table" id="sensTable"></table></div>
     </div>
     <div class="prec-bloco" style="margin-top:1rem;">
-      <div class="prec-titulo">Preço R$/t × Combustível (R$/L) × Margem</div>
+      <div class="prec-titulo" id="sensTitulo2">Preço R$/t × Nº de eixos × Margem</div>
+      <div style="overflow-x:auto;"><table class="sens-table" id="sensTableEixos"></table></div>
+    </div>
+    <div class="prec-bloco" style="margin-top:1rem;">
+      <div class="prec-titulo" id="sensTitulo3">Preço R$/t × Combustível (R$/L) × Margem</div>
       <div style="overflow-x:auto;"><table class="sens-table" id="sensTableComb"></table></div>
     </div>
-    <div class="fonte-nota">Análise de sensibilidade com cenário de retorno atual. Células verdes ≥ 18% margem, amarelas 10–18%, vermelhas &lt; 10%.</div>
+    <div class="fonte-nota" id="sensNota">Células verdes ≥ 18% margem, amarelas 10–18%, vermelhas &lt; 10%. Célula azul = cenário atual.</div>
   </div>
 </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
 const GOOGLE_KEY = 'AIzaSyAk_wJ0jAxN4jMJ6BoVB9BoRogVP8otTNQ';
-const PISCOFINS = 0.0925;
 
 const CAPACIDADE = {2:10,3:14,4:19,5:27,6:30,7:35,9:45};
+const EIXOS_LISTA = [2,3,4,5,6,7,9];
 
 const TABELA_ANTT = {
   granelSolido:  {2:{CCD:3.7123,CC:444.84},3:{CCD:4.7427,CC:533.36},4:{CCD:5.3672,CC:576.59},5:{CCD:6.1859,CC:642.10},6:{CCD:6.8058,CC:656.76},7:{CCD:7.4505,CC:792.30},9:{CCD:8.5300,CC:877.83}},
@@ -546,31 +594,42 @@ const ICMS_TABLE = {
   PR:{SP:7,MG:7,PR:19.5,SC:12,RS:12,MS:7,MT:7,GO:7,RJ:12,ES:7,BA:7,PE:7,CE:7,MA:7,PA:7,AM:7,RO:7,TO:12,PI:7,AL:7,SE:7,PB:7,RN:7,AC:7,AP:7,RR:7,DF:7},
   MS:{SP:12,MG:12,PR:12,SC:12,RS:12,MS:17,MT:12,GO:12,RJ:12,ES:12,BA:12,PE:12,CE:12,MA:12,PA:12,AM:12,RO:12,TO:12,PI:12,AL:12,SE:12,PB:12,RN:12,AC:12,AP:12,RR:12,DF:12},
   MT:{SP:12,MG:12,PR:12,SC:12,RS:12,MS:12,MT:17,GO:12,RJ:12,ES:12,BA:12,PE:12,CE:12,MA:12,PA:12,AM:12,RO:12,TO:12,PI:12,AL:12,SE:12,PB:12,RN:12,AC:12,AP:12,RR:12,DF:12},
-  SC:{SP:7,MG:7,PR:12,SC:17,RS:12,MS:7,MT:7,GO:7,RJ:7,ES:7,BA:7,PE:7,CE:7,MA:7,PA:7,AM:7,RO:7,TO:7,PI:7,AL:7,SE:7,PB:7,RN:7,AC:7,AP:7,RR:7,DF:7},
-  RS:{SP:7,MG:7,PR:12,SC:12,RS:17,MS:7,MT:7,GO:7,RJ:7,ES:7,BA:7,PE:7,CE:7,MA:7,PA:7,AM:7,RO:7,TO:7,PI:7,AL:7,SE:7,PB:7,RN:7,AC:7,AP:7,RR:7,DF:7},
 };
 
 const CENARIOS = [
-  {label:'Muito alta', pct:0,   cls:'c0'},
-  {label:'Alta',       pct:0.25,cls:'c25'},
-  {label:'Razoável',   pct:0.5, cls:'c50'},
-  {label:'Baixa',      pct:0.75,cls:'c75'},
-  {label:'Muito baixa',pct:1.0, cls:'c100'},
+  {label:'Muito alta',pct:0,   cls:'c0'},
+  {label:'Alta',      pct:0.25,cls:'c25'},
+  {label:'Razoável',  pct:0.5, cls:'c50'},
+  {label:'Baixa',     pct:0.75,cls:'c75'},
+  {label:'Muito baixa',pct:1.0,cls:'c100'},
 ];
 
 let origemPlaceId=null, destinoPlaceId=null, origemUF=null, destinoUF=null;
 let pedagioMode='eixo', pedagioTipo='vpo', tempoMode='api';
-let cachedRoute=null;
+let cenarioSelecionado=2; // índice do cenário ativo (padrão: Razoável)
+let cachedRoute=null, cachedParams=null, cachedKm=0, cachedDurSec=0;
 
-// ── helpers ──
+// ── Helpers ──
 function parseBR(v){ return parseFloat((v||'0').toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0; }
 function brl(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function pctFmt(v){ return v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'; }
-function formatDur(s){ const h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h===0?m+'min':m===0?h+'h':h+'h'+m+'min'; }
+
+function formatDur(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+  if(h===0) return m+'min';
+  if(m===0) return h+'h';
+  return h+'h'+m+'min';
+}
+
+function formatHoras(h){
+  const hh=Math.floor(h), mm=Math.round((h-hh)*60);
+  if(hh===0) return mm+'min';
+  if(mm===0) return hh+'h';
+  return hh+'h'+mm+'min';
+}
 
 function aplicarMascara(id){
-  const el=document.getElementById(id);
-  if(!el) return;
+  const el=document.getElementById(id); if(!el) return;
   el.addEventListener('input',function(){
     let d=this.value.replace(/\D/g,'');
     if(!d){this.value='';return;}
@@ -583,15 +642,14 @@ function aplicarMascara(id){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  ['pedagioEixo','pedagioTotalInput','precoMercado','cfCredito','cfSemCredito'].forEach(aplicarMascara);
+  ['pedagioEixo','pedagioTotalInput','precoMercado'].forEach(aplicarMascara);
 });
 
-// ── UI toggles ──
+// ── UI ──
 function showMain(tab){
-  ['premissas','cotacao'].forEach(t=>{
-    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active',t===tab);
-    document.querySelectorAll('.main-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&tab==='premissas')||(i===1&&tab==='cotacao')));
-  });
+  document.getElementById('panelCotacao').classList.toggle('active',tab==='cotacao');
+  document.getElementById('panelPremissas').classList.toggle('active',tab==='premissas');
+  document.querySelectorAll('.main-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&tab==='cotacao')||(i===1&&tab==='premissas')));
 }
 
 function showResult(tab){
@@ -615,10 +673,10 @@ function setPedagioTipo(t){
   const info=document.getElementById('infoPedagioTipo');
   if(t==='vpo'){
     info.textContent='VPO: acrescido após o cálculo, fora do faturamento — sem impacto em PIS/COFINS ou comissão.';
-    info.style.background='#f0f9ff'; info.style.borderColor='#bae6fd'; info.style.color='#0369a1';
+    info.style.cssText='background:#f0f9ff;border-color:#bae6fd;color:#0369a1;border:1px solid;border-radius:8px;padding:8px 12px;font-size:.75rem;margin-bottom:.8rem;';
   } else {
     info.textContent='Embutido: entra no faturamento — gera crédito de PIS/COFINS e incide comissão e ICMS.';
-    info.style.background='#fefce8'; info.style.borderColor='#fde68a'; info.style.color='#92400e';
+    info.style.cssText='background:#fefce8;border-color:#fde68a;color:#92400e;border:1px solid;border-radius:8px;padding:8px 12px;font-size:.75rem;margin-bottom:.8rem;';
   }
 }
 
@@ -627,19 +685,16 @@ function setTempoMode(m){
   document.getElementById('btnAPI').classList.toggle('active',m==='api');
   document.getElementById('btnVelMedia').classList.toggle('active',m==='vel');
   document.getElementById('campoVelMedia').style.display=m==='vel'?'':'none';
-  document.getElementById('infoTempoMode').innerHTML='Fonte do tempo de deslocamento: <strong>'+(m==='api'?'API Google':'Velocidade média configurável')+'</strong>';
+  document.getElementById('infoTempoMode').innerHTML='Fonte: <strong>'+(m==='api'?'Tempo da API Google':'Velocidade média configurável')+'</strong>';
 }
 
-function atualizarCapacidade(){
+function atualizarPeso(){
   const e=parseInt(document.getElementById('numEixos').value);
-  const c=CAPACIDADE[e];
-  if(c){document.getElementById('tonelagem').value=c;document.getElementById('pesoEmb').value=c;}
+  const c=CAPACIDADE[e]; if(c) document.getElementById('pesoEmb').value=c;
 }
 
 function inferirUF(txt){
-  const match=txt.match(/,\s*([A-Z]{2})\s*(?:,|$)/);
-  if(match) return match[1];
-  return null;
+  const match=txt.match(/,\s*([A-Z]{2})\s*(?:,|$)/); return match?match[1]:null;
 }
 
 function atualizarIcms(){
@@ -647,67 +702,44 @@ function atualizarIcms(){
   if(origemUF&&destinoUF&&ICMS_TABLE[origemUF]?.[destinoUF]!==undefined){
     const t=ICMS_TABLE[origemUF][destinoUF];
     document.getElementById('icms').value=t;
-    av.textContent=`ICMS ${origemUF}→${destinoUF} preenchido automaticamente: ${t}% — verifique diferimento ou isenção`;
+    av.textContent=`ICMS ${origemUF}→${destinoUF}: ${t}% preenchido automaticamente — verifique diferimento`;
     av.style.display='block';
   } else { av.style.display='none'; }
 }
 
 function parseCoordenadas(txt){
-  // Aceita formatos: "-23.5489, -46.6388" / "-23.5489 -46.6388" / "-23.5489;-46.6388"
-  const match = txt.trim().match(/^(-?\d{1,3}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/);
+  const match=txt.trim().match(/^(-?\d{1,3}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/);
   if(!match) return null;
-  const lat = parseFloat(match[1].replace(',','.'));
-  const lng = parseFloat(match[2].replace(',','.'));
-  if(isNaN(lat)||isNaN(lng)) return null;
-  if(lat<-90||lat>90||lng<-180||lng>180) return null;
-  return {latitude:lat, longitude:lng};
+  const lat=parseFloat(match[1].replace(',','.')), lng=parseFloat(match[2].replace(',','.'));
+  if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180) return null;
+  return {latitude:lat,longitude:lng};
 }
 
-function buildWaypoint(txt, placeId){
-  const coords = parseCoordenadas(txt);
+function buildWaypoint(txt,placeId){
+  const coords=parseCoordenadas(txt);
   if(coords) return {location:{latLng:coords}};
   if(placeId) return {placeId};
-  return {address: txt + (txt.toLowerCase().includes('brasil') ? '' : ', Brasil')};
+  return {address:txt+(txt.toLowerCase().includes('brasil')?'':', Brasil')};
 }
 
 function initAutocomplete(){
-  // Sem restrição de tipo — aceita endereços completos além de cidades
   const opts={componentRestrictions:{country:'br'},fields:['place_id','name','formatted_address']};
-
   const acO=new google.maps.places.Autocomplete(document.getElementById('origem'),opts);
-  acO.addListener('place_changed',()=>{
-    const p=acO.getPlace(); origemPlaceId=p.place_id||null;
-    origemUF=inferirUF(p.formatted_address||''); atualizarIcms(); cachedRoute=null;
-  });
-
+  acO.addListener('place_changed',()=>{const p=acO.getPlace();origemPlaceId=p.place_id||null;origemUF=inferirUF(p.formatted_address||'');atualizarIcms();cachedRoute=null;});
   const acD=new google.maps.places.Autocomplete(document.getElementById('destino'),opts);
-  acD.addListener('place_changed',()=>{
-    const p=acD.getPlace(); destinoPlaceId=p.place_id||null;
-    destinoUF=inferirUF(p.formatted_address||''); atualizarIcms(); cachedRoute=null;
-  });
-
-  // Se o usuário editar manualmente, limpa o place_id
-  // Mas NÃO limpa se parecer coordenadas — deixa passar direto
-  document.getElementById('origem').addEventListener('input',()=>{
-    origemPlaceId=null; origemUF=null; cachedRoute=null;
-  });
-  document.getElementById('destino').addEventListener('input',()=>{
-    destinoPlaceId=null; destinoUF=null; cachedRoute=null;
-  });
+  acD.addListener('place_changed',()=>{const p=acD.getPlace();destinoPlaceId=p.place_id||null;destinoUF=inferirUF(p.formatted_address||'');atualizarIcms();cachedRoute=null;});
+  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;origemUF=null;cachedRoute=null;});
+  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;destinoUF=null;cachedRoute=null;});
 }
 
-// ── API ──
 async function getRoute(){
   if(cachedRoute) return cachedRoute;
-  const origemTxt  = document.getElementById('origem').value.trim();
-  const destinoTxt = document.getElementById('destino').value.trim();
-
-  const origin      = buildWaypoint(origemTxt,  origemPlaceId);
-  const destination = buildWaypoint(destinoTxt, destinoPlaceId);
-
-  // Aviso visual se coordenadas detectadas
-  const origemCoords  = parseCoordenadas(origemTxt);
-  const destinoCoords = parseCoordenadas(destinoTxt);
+  const origemTxt=document.getElementById('origem').value.trim();
+  const destinoTxt=document.getElementById('destino').value.trim();
+  const origin=buildWaypoint(origemTxt,origemPlaceId);
+  const destination=buildWaypoint(destinoTxt,destinoPlaceId);
+  const origemCoords=parseCoordenadas(origemTxt);
+  const destinoCoords=parseCoordenadas(destinoTxt);
   const res=await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`,{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Goog-FieldMask':'routes.distanceMeters,routes.duration'},
@@ -717,109 +749,268 @@ async function getRoute(){
   const data=await res.json();
   if(!data.routes?.length) throw new Error('Rota não encontrada entre os pontos informados.');
   const r=data.routes[0];
-
-  // Labels para exibição — usa "Lat/Lng" quando forem coordenadas
-  const origemLabel  = origemCoords
-    ? `${origemCoords.latitude.toFixed(4)}, ${origemCoords.longitude.toFixed(4)}`
-    : origemTxt.split(',')[0];
-  const destinoLabel = destinoCoords
-    ? `${destinoCoords.latitude.toFixed(4)}, ${destinoCoords.longitude.toFixed(4)}`
-    : destinoTxt.split(',')[0];
-
-  cachedRoute={
-    km: Math.round(r.distanceMeters/1000),
-    durSec: parseInt((r.duration||'0s').replace('s','')),
-    origemLabel, destinoLabel
-  };
+  const origemLabel=origemCoords?`${origemCoords.latitude.toFixed(4)}, ${origemCoords.longitude.toFixed(4)}`:origemTxt.split(',')[0];
+  const destinoLabel=destinoCoords?`${destinoCoords.latitude.toFixed(4)}, ${destinoCoords.longitude.toFixed(4)}`:destinoTxt.split(',')[0];
+  cachedRoute={km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s','')),origemLabel,destinoLabel};
   return cachedRoute;
 }
 
-// ── CÁLCULO PRINCIPAL ──
+// ── Cálculo principal ──
 function calcularPreco(km, durSec, retVazioFrac, params){
   const {cvCred,cvSem,cfCred,cfSem,diasUteis,horasDia,horasCarga,horasDescarga,
          consCarreg,consVazio,combLitro,comissaoPct,piscofinsPct,icmsPct,margemPct,
-         pesoEmb,pedagio,pedagioTipoParam} = params;
+         pesoEmb,pedagio,pedagioTipoParam,velMedia} = params;
 
-  // Tempo
-  const tIda = tempoMode==='api' ? durSec/3600 : km/params.velMedia;
-  const tOp  = horasCarga + tIda + horasDescarga + (tIda * retVazioFrac);
+  const tIda  = tempoMode==='api'?durSec/3600:km/velMedia;
+  const tOp   = horasCarga+tIda+horasDescarga+(tIda*retVazioFrac);
+  const cfHora= (cfCred+cfSem)/(diasUteis*horasDia);
+  const cfViagem= cfHora*tOp;
+  const cfCredViagem=(cfCred/(cfCred+cfSem||1))*cfViagem;
+  const cvViagem=(cvCred+cvSem)*km*(1+retVazioFrac);
+  const cvCredViagem=cvCred*km*(1+retVazioFrac);
+  const combIda=(km/consCarreg)*combLitro;
+  const combVolta=(km/consVazio)*combLitro*retVazioFrac;
+  const combTotal=combIda+combVolta;
 
-  // CF rateado
-  const cfHora       = (cfCred+cfSem)/(diasUteis*horasDia);
-  const cfViagem     = cfHora*tOp;
-  const cfCredViagem = (cfCred/(cfCred+cfSem||1))*cfViagem;
+  let custoOp,baseCredito,creditoPC,custoLiq,receitaBase,receitaComIcms,precTon,pedagioTon;
 
-  // CV
-  const cvViagem     = (cvCred+cvSem)*km*(1+retVazioFrac);
-  const cvCredViagem = cvCred*km*(1+retVazioFrac);
-
-  // Combustível
-  const combIda   = (km/consCarreg)*combLitro;
-  const combVolta = (km/consVazio)*combLitro*retVazioFrac;
-  const combTotal = combIda+combVolta;
-
-  // ── Situação 1: VPO pago pelo embarcador ──
-  // Pedágio fora do faturamento — não entra em nenhuma base
-  if(pedagioTipoParam === 'vpo'){
-    const custoOp    = cfViagem+cvViagem+combTotal;
-    const baseCredito= cfCredViagem+cvCredViagem+combTotal;
-    const creditoPC  = baseCredito*piscofinsPct;
-    const custoLiq   = custoOp-creditoPC;
-
-    const denominador = 1-margemPct-piscofinsPct-comissaoPct;
-    if(denominador<=0) throw new Error('Parâmetros inválidos: margem + impostos + comissão ultrapassa 100%.');
-    const receitaBase    = custoLiq/denominador;
-    const receitaComIcms = icmsPct>0 ? receitaBase/(1-icmsPct) : receitaBase;
-
-    // Pedágio acrescido após o cálculo, à parte
-    const precTon    = receitaComIcms/pesoEmb;
-    const pedagioTon = pedagio/pesoEmb;
-
-    const impostosFat = receitaBase*piscofinsPct;
-    const comissao    = receitaBase*comissaoPct;
-    const icmsVal     = receitaComIcms-receitaBase;
-    const lucro       = receitaComIcms-custoOp-impostosFat-comissao-icmsVal;
-    const margemReal  = lucro/receitaComIcms;
-
-    return {precTon, pedagioTon, precTonTotal: precTon+pedagioTon,
-            receitaBase, receitaComIcms, receita: receitaComIcms,
-            custoOp, custoLiq, creditoPC, baseCredito,
-            combIda, combVolta, combTotal, cfViagem, cvViagem,
-            impostosFat, comissao, icmsVal, lucro, margemReal,
-            tOp, tIda, cfHora, pedagioNaBase: false};
+  if(pedagioTipoParam==='vpo'){
+    custoOp=cfViagem+cvViagem+combTotal;
+    baseCredito=cfCredViagem+cvCredViagem+combTotal;
+    creditoPC=baseCredito*piscofinsPct;
+    custoLiq=custoOp-creditoPC;
+    const den=1-margemPct-piscofinsPct-comissaoPct;
+    if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
+    receitaBase=custoLiq/den;
+    receitaComIcms=icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
+    precTon=receitaComIcms/pesoEmb;
+    pedagioTon=pedagio/pesoEmb;
+  } else {
+    custoOp=cfViagem+cvViagem+combTotal;
+    baseCredito=cfCredViagem+cvCredViagem+combTotal+pedagio;
+    creditoPC=baseCredito*piscofinsPct;
+    custoLiq=custoOp-creditoPC;
+    const den=1-margemPct-piscofinsPct-comissaoPct;
+    if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
+    receitaBase=(custoLiq+pedagio)/den;
+    receitaComIcms=icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
+    precTon=receitaComIcms/pesoEmb;
+    pedagioTon=0;
   }
 
-  // ── Situação 2: Pedágio embutido no frete ──
-  // Entra no faturamento → gera crédito PC, incide comissão e ICMS
-  else {
-    const custoOp    = cfViagem+cvViagem+combTotal;
-    // Crédito: base operacional + pedágio (gera crédito quando está no faturamento)
-    const baseCredito= cfCredViagem+cvCredViagem+combTotal+pedagio;
-    const creditoPC  = baseCredito*piscofinsPct;
-    const custoLiq   = custoOp-creditoPC;
+  const impostosFat=receitaBase*piscofinsPct;
+  const comissao=receitaBase*comissaoPct;
+  const icmsVal=receitaComIcms-receitaBase;
+  const custoOpTotal=pedagioTipoParam==='embutido'?custoOp+pedagio:custoOp;
+  const lucro=receitaComIcms-custoOpTotal-impostosFat-comissao-icmsVal;
+  const margemReal=lucro/receitaComIcms;
 
-    // Pedágio entra no numerador da receita base
-    const denominador = 1-margemPct-piscofinsPct-comissaoPct;
-    if(denominador<=0) throw new Error('Parâmetros inválidos: margem + impostos + comissão ultrapassa 100%.');
-    const receitaBase    = (custoLiq+pedagio)/denominador;
-    const receitaComIcms = icmsPct>0 ? receitaBase/(1-icmsPct) : receitaBase;
+  return {precTon,pedagioTon,precTonTotal:precTon+pedagioTon,
+          receitaBase,receitaComIcms,custoOp,custoOpTotal,custoLiq,creditoPC,baseCredito,
+          combIda,combVolta,combTotal,cfViagem,cvViagem,
+          impostosFat,comissao,icmsVal,lucro,margemReal,tOp,tIda,cfHora};
+}
 
-    const precTon    = receitaComIcms/pesoEmb;
-    const pedagioTon = 0; // já embutido no preço
+function semaforoClass(mr){ return mr>=18?'margem-ok':mr>=10?'margem-warn':'margem-bad'; }
+function sensClass(mr,isAtual){ return isAtual?(mr>=18?'sens-good':mr>=10?'sens-warn':'sens-bad')+' sens-atual-cell':mr>=18?'sens-good':mr>=10?'sens-warn':'sens-bad'; }
 
-    const impostosFat = receitaBase*piscofinsPct;
-    const comissao    = receitaBase*comissaoPct;
-    const icmsVal     = receitaComIcms-receitaBase;
-    const lucro       = receitaComIcms-custoOp-pedagio-impostosFat-comissao-icmsVal;
-    const margemReal  = lucro/receitaComIcms;
+// ── Renderizar cenários (chamado também ao clicar) ──
+function renderCenarios(km, durSec, params, margemPct){
+  const cgEl=document.getElementById('cenariosGrid');
+  cgEl.innerHTML=CENARIOS.map((c,i)=>{
+    const r=calcularPreco(km,durSec,c.pct,params);
+    const mCls=semaforoClass(r.margemReal*100);
+    const sel=i===cenarioSelecionado;
+    return `<div class="cenario-card ${c.cls}${sel?' selecionado':''}" onclick="selecionarCenario(${i})">
+      <div class="cenario-label">${c.label}</div>
+      <div class="cenario-prec">${brl(r.precTonTotal)}</div>
+      <div class="cenario-margem ${mCls}">${pctFmt(r.margemReal*100)}</div>
+    </div>`;
+  }).join('');
+}
 
-    return {precTon, pedagioTon: 0, precTonTotal: precTon,
-            receitaBase, receitaComIcms, receita: receitaComIcms,
-            custoOp, custoLiq, creditoPC, baseCredito,
-            combIda, combVolta, combTotal, cfViagem, cvViagem,
-            impostosFat, comissao, icmsVal, lucro, margemReal,
-            tOp, tIda, cfHora, pedagioNaBase: true};
+function selecionarCenario(idx){
+  cenarioSelecionado=idx;
+  if(!cachedParams||!cachedKm) return;
+  // Recalcula com novo cenário e atualiza tudo
+  const c=CENARIOS[idx];
+  const calc=calcularPreco(cachedKm,cachedDurSec,c.pct,cachedParams);
+  atualizarPrecificacao(calc,cachedParams,cachedKm,cachedDurSec,c);
+  renderCenarios(cachedKm,cachedDurSec,cachedParams,cachedParams.margemPct*100);
+  renderSensibilidade(cachedKm,cachedDurSec,cachedParams,c.pct);
+}
+
+function atualizarPrecificacao(calc,params,km,durSec,cenario){
+  const {pesoEmb,pedagio,icmsPct,piscofinsPct,comissaoPct,margemPct,combLitro,consCarreg,consVazio}=params;
+  const precoMerc=parseBR(document.getElementById('precoMercado').value);
+
+  document.getElementById('precTon').textContent=brl(calc.precTonTotal);
+  const pedagioDesc=pedagioTipo==='vpo'?`VPO ${brl(pedagio)} à parte`:`Pedágio ${brl(pedagio)} embutido`;
+  document.getElementById('precSub').textContent=`Receita ${brl(calc.receitaComIcms)} · ${pesoEmb} t · ${pedagioDesc}`;
+  document.getElementById('precScenario').textContent=cenario.label;
+
+  const mr=calc.margemReal*100;
+  const mrEl=document.getElementById('margemReal');
+  mrEl.textContent=pctFmt(mr);
+  mrEl.className='margem-val '+semaforoClass(mr);
+
+  // Equilíbrio
+  const calcEq=calcularPreco(km,durSec,cenario.pct,{...params,margemPct:0});
+
+  if(precoMerc>0){
+    document.getElementById('boxMercado').style.display='block';
+    document.getElementById('boxEquilibrio').style.display='none';
+
+    // Calcular margem ao preço de mercado
+    const recMerc=precoMerc*pesoEmb;
+    const recBaseMerc=icmsPct>0?recMerc*(1-icmsPct):recMerc;
+    const lucroMerc=recMerc-calc.custoOpTotal-(recBaseMerc*piscofinsPct)-(recBaseMerc*comissaoPct)-(recMerc-recBaseMerc);
+    const margemMerc=lucroMerc/recMerc*100;
+
+    const diff=precoMerc-calc.precTonTotal;
+    const diffPct=((precoMerc/calc.precTonTotal)-1)*100;
+    const folgaEquil=precoMerc-calcEq.precTonTotal;
+
+    const situacao=diff>0.01?'acima':diff<-0.01?'abaixo':'igual';
+    const box=document.getElementById('mercadoBox');
+    box.className='mercado-box '+situacao;
+    document.getElementById('mercadoTitulo').textContent=
+      situacao==='acima'?'Mercado paga acima da nossa cotação':
+      situacao==='abaixo'?'Mercado paga abaixo da nossa cotação':
+      'Mercado alinhado com nossa cotação';
+    document.getElementById('mercadoIcone').textContent=situacao==='acima'?'✅':situacao==='abaixo'?'⚠️':'〰️';
+    document.getElementById('mercadoPreco').textContent=brl(precoMerc)+'/t';
+    document.getElementById('mercadoNossa').textContent=brl(calc.precTonTotal)+'/t';
+    const diffEl=document.getElementById('mercadoDiff');
+    diffEl.textContent=(diff>=0?'+':'')+brl(diff)+'/t';
+    diffEl.className='mercado-item-val '+(diff>=0?'pos':'neg');
+    const margemMercEl=document.getElementById('mercadoMargem');
+    margemMercEl.textContent=pctFmt(margemMerc);
+    margemMercEl.className='mercado-item-val '+semaforoClass(margemMerc);
+    document.getElementById('mercadoEquil').textContent=brl(calcEq.precTonTotal)+'/t';
+    const folgaEl=document.getElementById('mercadoFolga');
+    folgaEl.textContent=(folgaEquil>=0?'+':'')+brl(folgaEquil)+'/t';
+    folgaEl.className='mercado-item-val '+(folgaEquil>=0?'pos':'neg');
+
+    let recomenda='';
+    if(situacao==='acima' && margemMerc>=18) recomenda='✅ Aceitar o preço de mercado — margem excelente';
+    else if(situacao==='acima' && margemMerc>=10) recomenda='👍 Aceitar — margem satisfatória ao preço de mercado';
+    else if(situacao==='acima' && margemMerc<10) recomenda='⚠ Aceitar com cautela — margem baixa ao preço de mercado';
+    else if(situacao==='abaixo' && folgaEquil>=0) recomenda='⚠ Negociar — mercado paga abaixo da cotação mas acima do equilíbrio';
+    else if(situacao==='abaixo' && folgaEquil<0) recomenda='🚫 Não aceitar — mercado abaixo do ponto de equilíbrio';
+    else recomenda='〰 Mercado alinhado com cotação';
+    document.getElementById('mercadoRecomenda').textContent=recomenda;
+  } else {
+    document.getElementById('boxMercado').style.display='none';
+    document.getElementById('boxEquilibrio').style.display='block';
+    document.getElementById('equilibrioVal').textContent=brl(calcEq.precTonTotal);
+    document.getElementById('equilibrioDet').textContent=`Margem 0% · Custo total ${brl(calcEq.custoOpTotal)}`;
+    const folga=calc.precTonTotal-calcEq.precTonTotal;
+    document.getElementById('folgaEquil').textContent=brl(folga)+'/t';
+    document.getElementById('folgaEquilDet').textContent=`${pctFmt((folga/calcEq.precTonTotal)*100)} acima do equilíbrio`;
   }
+
+  // Decomposição de custos
+  const tOpFmt=formatHoras(calc.tOp);
+  const pedagioLinha=pedagioTipo==='vpo'
+    ?['🛣 Pedágio (VPO — à parte)',brl(pedagio),'Não integra o faturamento',false,true]
+    :['🛣 Pedágio (embutido)',brl(pedagio),`Gera crédito PC: ${brl(pedagio*piscofinsPct)}`,false,false];
+  const rows=[
+    ['⛽ Combustível ida',brl(calc.combIda),`${km} km ÷ ${consCarreg} km/L × R$${combLitro.toFixed(2).replace('.',',')}`,false,false],
+    ['⛽ Combustível volta vazia',brl(calc.combVolta),`${km} km ÷ ${consVazio} km/L × ${(cenario.pct*100).toFixed(0)}% retorno vazio`,false,false],
+    ['🔧 Custo variável (CV)',brl(calc.cvViagem),`R$${(params.cvCred+params.cvSem).toFixed(4).replace('.',',')} /km × ${km} km × (1+${(cenario.pct*100).toFixed(0)}%)`,false,false],
+    ['🏗 Custo fixo rateado',brl(calc.cfViagem),`R$${calc.cfHora.toFixed(4).replace('.',',')} /h × ${tOpFmt} operação`,false,false],
+    pedagioLinha,
+    ['',brl(calc.custoOp),'Custo operacional bruto',true,false],
+    ['✅ Crédito PIS/COFINS','('+brl(calc.creditoPC)+')',`Base ${brl(calc.baseCredito)} × ${(piscofinsPct*100).toFixed(2).replace('.',',')}%`,false,true],
+    ['',brl(calc.custoLiq),'Custo líquido',true,false],
+    ['📋 PIS/COFINS débito',brl(calc.impostosFat),`${(piscofinsPct*100).toFixed(2).replace('.',',')}% s/ receita base`,false,false],
+    ['👷 Comissão motorista',brl(calc.comissao),`${(comissaoPct*100).toFixed(0)}% s/ receita base`,false,false],
+    ['🏛 ICMS',brl(calc.icmsVal),icmsPct>0?`${(icmsPct*100).toFixed(1).replace('.',',')}% por fora`:'Diferido / não incide',false,false],
+    ['💰 Lucro',brl(calc.lucro),`Margem ${pctFmt(calc.margemReal*100)} s/ receita`,true,false],
+  ];
+  document.getElementById('custoTable').innerHTML=rows.map(([label,val,det,isTotal,isCredito])=>{
+    if(!label) return `<tr class="subtotal"><td colspan="2" class="row-label" style="font-size:.7rem;color:#6b7280;">${det}</td><td>${val}</td></tr>`;
+    const cor=isCredito?'style="color:#15803d;"':'';
+    const op=label.includes('VPO')?'style="opacity:.6;"':'';
+    return `<tr ${op} class="${isCredito?'credito-row':''}"><td class="row-label" ${cor}>${label}<span class="row-detalhe">${det}</span></td><td ${cor}>${val}</td></tr>`;
+  }).join('');
+
+  // Semáforo
+  const faixas=[
+    {l:'< 10% — Ruim',c:'sem-ruim',a:mr<10},
+    {l:'10–12% — Mínimo',c:'sem-minimo',a:mr>=10&&mr<12},
+    {l:'12–18% — Saudável',c:'sem-sauda',a:mr>=12&&mr<18},
+    {l:'18–22% — Bom',c:'sem-bom',a:mr>=18&&mr<22},
+    {l:'> 22% — Excelente',c:'sem-excel',a:mr>=22},
+  ];
+  document.getElementById('semaforo').innerHTML=faixas.map(f=>`<div class="sem-item ${f.c}${f.a?' sem-atual':''}">${f.l}</div>`).join('');
+}
+
+function renderSensibilidade(km,durSec,params,retVazioFrac){
+  const {pesoEmb,margemPct,combLitro,numEixos}=params;
+  const margens=[5,10,15,20,25];
+
+  // Tabela 1: Peso × Margem
+  const pesos=[Math.round(pesoEmb*0.7),Math.round(pesoEmb*0.85),Math.round(pesoEmb),Math.round(pesoEmb*1.15),Math.round(pesoEmb*1.30)];
+  let tbl1='<tr><th>Peso \\ Margem</th>'+margens.map(m=>`<th>${m}%</th>`).join('')+'</tr>';
+  pesos.forEach(p=>{
+    const isAtual=p===Math.round(pesoEmb);
+    tbl1+=`<tr${isAtual?' class="atual-row"':''}>`;
+    tbl1+=`<td>${p} t</td>`;
+    margens.forEach(m=>{
+      const r=calcularPreco(km,durSec,retVazioFrac,{...params,pesoEmb:p,margemPct:m/100});
+      const mr2=r.margemReal*100;
+      tbl1+=`<td class="${sensClass(mr2,isAtual&&m===Math.round(margemPct*100))}">${brl(r.precTonTotal)}</td>`;
+    });
+    tbl1+='</tr>';
+  });
+  document.getElementById('sensTable').innerHTML=tbl1;
+
+  // Tabela 2: Eixos × Margem
+  let tbl2='<tr><th>Eixos \\ Margem</th>'+margens.map(m=>`<th>${m}%</th>`).join('')+'</tr>';
+  EIXOS_LISTA.forEach(e=>{
+    const isAtual=e===numEixos;
+    let pedagioEixos=params.pedagio;
+    // Recalcula pedágio para cada configuração de eixos se modo por eixo
+    if(pedagioMode==='eixo'){
+      const pEixo=parseBR(document.getElementById('pedagioEixo').value);
+      pedagioEixos=pEixo*e;
+    }
+    const cap=CAPACIDADE[e];
+    const peso=Math.min(pesoEmb,cap);
+    tbl2+=`<tr${isAtual?' class="atual-row"':''}>`;
+    tbl2+=`<td>${e} eixos (${cap}t)</td>`;
+    margens.forEach(m=>{
+      const r=calcularPreco(km,durSec,retVazioFrac,{...params,pesoEmb:peso,margemPct:m/100,pedagio:pedagioEixos});
+      const mr2=r.margemReal*100;
+      tbl2+=`<td class="${sensClass(mr2,isAtual&&m===Math.round(margemPct*100))}">${brl(r.precTonTotal)}</td>`;
+    });
+    tbl2+='</tr>';
+  });
+  document.getElementById('sensTableEixos').innerHTML=tbl2;
+
+  // Tabela 3: Combustível × Margem
+  const combs=[combLitro*0.85,combLitro*0.92,combLitro,combLitro*1.08,combLitro*1.15];
+  let tbl3='<tr><th>Comb. \\ Margem</th>'+margens.map(m=>`<th>${m}%</th>`).join('')+'</tr>';
+  combs.forEach((cb,ci)=>{
+    const isAtual=ci===2;
+    tbl3+=`<tr${isAtual?' class="atual-row"':''}>`;
+    tbl3+=`<td>R$${cb.toFixed(2).replace('.',',')}/L</td>`;
+    margens.forEach(m=>{
+      const r=calcularPreco(km,durSec,retVazioFrac,{...params,combLitro:cb,margemPct:m/100});
+      const mr2=r.margemReal*100;
+      tbl3+=`<td class="${sensClass(mr2,isAtual&&m===Math.round(margemPct*100))}">${brl(r.precTonTotal)}</td>`;
+    });
+    tbl3+='</tr>';
+  });
+  document.getElementById('sensTableComb').innerHTML=tbl3;
+
+  const cenNome=CENARIOS[cenarioSelecionado].label;
+  document.getElementById('sensTitulo1').textContent=`Preço R$/t × Peso embarcado × Margem — retorno: ${cenNome}`;
+  document.getElementById('sensTitulo2').textContent=`Preço R$/t × Nº de eixos × Margem — retorno: ${cenNome}`;
+  document.getElementById('sensTitulo3').textContent=`Preço R$/t × Combustível (R$/L) × Margem — retorno: ${cenNome}`;
+  document.getElementById('sensNota').textContent=`Cenário de retorno: ${cenNome}. Verde ≥ 18%, amarelo 10–18%, vermelho < 10%. Célula azul = situação atual.`;
 }
 
 async function calcular(){
@@ -839,50 +1030,49 @@ async function calcular(){
   try{
     const {km,durSec,origemLabel,destinoLabel}=await getRoute();
 
-    // Parâmetros
-    const numEixos   =parseInt(document.getElementById('numEixos').value);
-    const tonelagem  =parseBR(document.getElementById('tonelagem').value)||CAPACIDADE[numEixos]||30;
-    const pesoEmb    =parseBR(document.getElementById('pesoEmb').value)||tonelagem;
-    const tipoCarga  =document.getElementById('tipoCarga').value;
-    const margemPct  =parseBR(document.getElementById('margem').value)/100;
-    const icmsPct    =parseBR(document.getElementById('icms').value)/100;
-    const precoMerc  =parseBR(document.getElementById('precoMercado').value);
+    const numEixos=parseInt(document.getElementById('numEixos').value);
+    const pesoEmb=parseBR(document.getElementById('pesoEmb').value)||CAPACIDADE[numEixos]||30;
+    const tipoCarga=document.getElementById('tipoCarga').value;
+    const margemPct=parseBR(document.getElementById('margem').value)/100;
+    const icmsPct=parseBR(document.getElementById('icms').value)/100;
 
     let pedagio=0;
     if(pedagioMode==='eixo') pedagio=parseBR(document.getElementById('pedagioEixo').value)*numEixos;
     else pedagio=parseBR(document.getElementById('pedagioTotalInput').value);
 
     const params={
-      cvCred      :parseBR(document.getElementById('cvCredito').value),
-      cvSem       :parseBR(document.getElementById('cvSemCredito').value),
-      cfCred      :parseBR(document.getElementById('cfCredito').value),
-      cfSem       :parseBR(document.getElementById('cfSemCredito').value),
-      diasUteis   :parseBR(document.getElementById('diasUteis').value)||22,
-      horasDia    :parseBR(document.getElementById('horasDia').value)||11,
-      horasCarga  :parseBR(document.getElementById('horasCarga').value)||2,
+      cvCred:parseBR(document.getElementById('cvCredito').value),
+      cvSem:parseBR(document.getElementById('cvSemCredito').value),
+      cfCred:parseBR(document.getElementById('cfCredito').value),
+      cfSem:parseBR(document.getElementById('cfSemCredito').value),
+      diasUteis:parseBR(document.getElementById('diasUteis').value)||22,
+      horasDia:parseBR(document.getElementById('horasDia').value)||11,
+      horasCarga:parseBR(document.getElementById('horasCarga').value)||2,
       horasDescarga:parseBR(document.getElementById('horasDescarga').value)||2,
-      consCarreg  :parseBR(document.getElementById('consCarreg').value)||1.7,
-      consVazio   :parseBR(document.getElementById('consVazio').value)||2.3,
-      combLitro   :parseBR(document.getElementById('combLitro').value)||7.8,
-      comissaoPct :parseBR(document.getElementById('comissao').value)/100,
+      consCarreg:parseBR(document.getElementById('consCarreg').value)||1.7,
+      consVazio:parseBR(document.getElementById('consVazio').value)||2.3,
+      combLitro:parseBR(document.getElementById('combLitro').value)||7.8,
+      comissaoPct:parseBR(document.getElementById('comissao').value)/100,
       piscofinsPct:parseBR(document.getElementById('piscofinsPct').value)/100,
-      icmsPct, margemPct, pesoEmb,
-      velMedia    :parseBR(document.getElementById('velMedia').value)||70,
-      pedagio, pedagioTipoParam: pedagioTipo,
+      velMedia:parseBR(document.getElementById('velMedia').value)||70,
+      icmsPct,margemPct,pesoEmb,pedagio,numEixos,
+      pedagioTipoParam:pedagioTipo,
     };
 
-    // Cálculo para cenário padrão (razoável = 50%)
-    const cenarioPadrao=CENARIOS[2];
-    const calc=calcularPreco(km,durSec,cenarioPadrao.pct,params);
+    // Salva para uso nos cenários
+    cachedParams=params; cachedKm=km; cachedDurSec=durSec;
 
-    // ── PISO ANTT ──
+    const cenario=CENARIOS[cenarioSelecionado];
+    const calc=calcularPreco(km,durSec,cenario.pct,params);
+
+    // Piso ANTT
     const tabela=TABELA_ANTT[tipoCarga];
     const coef=tabela?.[numEixos];
     let pisoBase=0,pisoViagem=0,pisoTon=0;
     if(coef){
-      pisoBase =(km*coef.CCD)+coef.CC;
+      pisoBase=(km*coef.CCD)+coef.CC;
       pisoViagem=pisoBase+pedagio;
-      pisoTon   =pisoViagem/tonelagem;
+      pisoTon=pisoViagem/pesoEmb;
     }
 
     // Label rota
@@ -890,28 +1080,25 @@ async function calcular(){
     ['routeLabel1','routeLabel2','routeLabel3'].forEach(id=>document.getElementById(id).innerHTML=routeHtml);
 
     // Tempo operação
-    const tIda=tempoMode==='api'?durSec/3600:km/params.velMedia;
-    const tOpPadrao=params.horasCarga+tIda+params.horasDescarga+(tIda*cenarioPadrao.pct);
+    const tOpH=calc.tOp;
 
-    // ── PREENCHE ABA PISO ──
+    // Piso ANTT
     document.getElementById('rDistKm').textContent=km.toLocaleString('pt-BR');
     document.getElementById('rDuracao').textContent=formatDur(durSec);
-    document.getElementById('rTempoOp').textContent=tOpPadrao.toFixed(1).replace('.',',');
+    document.getElementById('rTempoOp').textContent=formatHoras(tOpH);
 
     if(coef){
       document.getElementById('pisoTon').textContent=brl(pisoTon);
-      document.getElementById('pisoSub').textContent=`${brl(pisoViagem)} ÷ ${tonelagem} t`+(pedagio>0?` (incl. ${brl(pedagio)} pedágio)`:'');
-      document.getElementById('capBadge').textContent=tonelagem+' t';
+      document.getElementById('pisoSub').textContent=`${brl(pisoViagem)} ÷ ${pesoEmb} t`+(pedagio>0?` (incl. ${brl(pedagio)} pedágio)`:'');
+      document.getElementById('capBadge').textContent=pesoEmb+' t';
       document.getElementById('pisoTotalViagem').textContent=brl(pisoViagem);
       document.getElementById('pisoFormula').textContent=brl(pisoBase);
       document.getElementById('pisoFormDet').innerHTML=`${km} km × R$${coef.CCD.toFixed(4).replace('.',',')} + R$${coef.CC.toFixed(2).replace('.',',')}`;
-
       const nossaReceita=calc.receitaComIcms+(pedagioTipo==='vpo'?pedagio:0);
       document.getElementById('boxNossaCotPiso').style.display='block';
-      document.getElementById('nossaCotPiso').textContent=brl(calc.precTon+pedagio/pesoEmb);
+      document.getElementById('nossaCotPiso').textContent=brl(calc.precTonTotal);
       const diff=nossaReceita-pisoViagem;
       document.getElementById('nossaCotPisoDet').textContent=`Total ${brl(nossaReceita)} · ${diff>=0?'+':''}${brl(diff/pesoEmb)}/t vs piso`;
-
       const ap=document.getElementById('alertaPiso');
       ap.style.display='block';
       if(nossaReceita>=pisoViagem){
@@ -924,132 +1111,17 @@ async function calcular(){
     } else {
       ['pisoTon','pisoFormula'].forEach(id=>document.getElementById(id).textContent='—');
       document.getElementById('pisoSub').textContent='Combinação não prevista na tabela ANTT';
-      document.getElementById('capBadge').textContent=tonelagem+' t';
+      document.getElementById('capBadge').textContent=pesoEmb+' t';
       document.getElementById('pisoTotalViagem').textContent='—';
       document.getElementById('pisoFormDet').textContent='Sem coeficientes';
       document.getElementById('boxNossaCotPiso').style.display='none';
       document.getElementById('alertaPiso').style.display='none';
     }
 
-    // ── PREENCHE ABA PRECIFICAÇÃO ──
-    document.getElementById('precTon').textContent=brl(calc.precTonTotal);
-    const pedagioDesc = pedagioTipo==='vpo'
-      ? `Pedágio ${brl(pedagio)} (VPO) à parte`
-      : `Pedágio ${brl(pedagio)} embutido no frete`;
-    document.getElementById('precSub').textContent=`Receita ${brl(calc.receitaComIcms)} · ${pesoEmb} t · ${pedagioDesc}`;
-    document.getElementById('precScenario').textContent=cenarioPadrao.label+(pedagioTipo==='vpo'?' · VPO à parte':' · Pedágio embutido');
-
-    const mr=calc.margemReal*100;
-    const mrEl=document.getElementById('margemReal');
-    mrEl.textContent=pctFmt(mr);
-    mrEl.className='margem-val '+(mr>=18?'margem-ok':mr>=10?'margem-warn':'margem-bad');
-
-    // Cenários
-    const cgEl=document.getElementById('cenariosGrid');
-    cgEl.innerHTML=CENARIOS.map((c,i)=>{
-      const r=calcularPreco(km,durSec,c.pct,{...params});
-      const mCls=r.margemReal*100>=18?'margem-ok':r.margemReal*100>=10?'margem-warn':'margem-bad';
-      return `<div class="cenario-card ${c.cls}${i===2?' atual':''}">
-        <div class="cenario-label">${c.label}</div>
-        <div class="cenario-prec">${brl(r.precTonTotal)}</div>
-        <div class="cenario-margem ${mCls}">${pctFmt(r.margemReal*100)}</div>
-      </div>`;
-    }).join('');
-
-    // Preço de mercado
-    if(precoMerc>0){
-      document.getElementById('boxMercado').style.display='grid';
-      document.getElementById('boxEquilibrio').style.display='none';
-      const recMerc=precoMerc*pesoEmb;
-      const margemMerc=(recMerc-calc.custoOp-(recMerc/(1-icmsPct)-recMerc>0?(recMerc/(1-icmsPct)-recMerc):0)-(recMerc*params.piscofinsPct)-(recMerc*params.comissaoPct))/recMerc;
-      document.getElementById('mercadoVal').textContent=brl(precoMerc)+'/t';
-      document.getElementById('mercadoDet').textContent=`Receita total ${brl(recMerc)} · Margem estimada ${pctFmt(margemMerc*100)}`;
-      // Equilíbrio = margem 0
-      const calcEq=calcularPreco(km,durSec,cenarioPadrao.pct,{...params,margemPct:0});
-      document.getElementById('equilibrioVal').textContent=brl(calcEq.precTon);
-      document.getElementById('equilibrioDet').textContent=`Margem 0% · Receita mín. ${brl(calcEq.receitaComIcms)}`;
-    } else {
-      document.getElementById('boxMercado').style.display='none';
-      document.getElementById('boxEquilibrio').style.display='grid';
-      const calcEq=calcularPreco(km,durSec,cenarioPadrao.pct,{...params,margemPct:0});
-      document.getElementById('equilibrioVal2').textContent=brl(calcEq.precTon);
-      document.getElementById('equilibrioDet2').textContent=`Ponto de equilíbrio (margem 0%) · Receita mín. ${brl(calcEq.receitaComIcms)}`;
-    }
-
-    // Tabela decomposição
-    const pedagioLinha = pedagioTipo==='vpo'
-      ? ['🛣 Pedágio (VPO — fora do faturamento)', brl(pedagio), 'Acrescido à parte ao cliente', false, false, true]
-      : ['🛣 Pedágio (embutido no frete)',          brl(pedagio), `Gera crédito PC: ${brl(pedagio*params.piscofinsPct)}`, false, false, false];
-
-    const rows=[
-      ['⛽ Combustível ida',         brl(calc.combIda),   `${km} km ÷ ${params.consCarreg} km/L × R$${params.combLitro.toFixed(2).replace('.',',')}`, false, false, false],
-      ['⛽ Combustível volta vazia',  brl(calc.combVolta), `${km} km ÷ ${params.consVazio} km/L × ${(cenarioPadrao.pct*100).toFixed(0)}% retorno vazio`, false, false, false],
-      ['🔧 Custo variável (CV)',      brl(calc.cvViagem),  `R$${(params.cvCred+params.cvSem).toFixed(4).replace('.',',')} /km × ${km} km × (1 + ${(cenarioPadrao.pct*100).toFixed(0)}%)`, false, false, false],
-      ['🏗 Custo fixo rateado (CF)',  brl(calc.cfViagem),  `R$${calc.cfHora.toFixed(4).replace('.',',')} /h × ${tOpPadrao.toFixed(2).replace('.',',')} h`, false, false, false],
-      pedagioLinha,
-      ['', brl(calc.custoOp), 'Custo operacional bruto', true, false, false],
-      ['✅ Crédito PIS/COFINS',       '('+brl(calc.creditoPC)+')', `Base ${brl(calc.baseCredito)} × ${(params.piscofinsPct*100).toFixed(2).replace('.',',')}%`, false, false, true],
-      ['', brl(calc.custoLiq), 'Custo líquido', true, false, false],
-      ['📋 PIS/COFINS débito',        brl(calc.impostosFat),`${(params.piscofinsPct*100).toFixed(2).replace('.',',')}% s/ receita base`, false, false, false],
-      ['👷 Comissão motorista',       brl(calc.comissao),  `${(params.comissaoPct*100).toFixed(0)}% s/ receita base`, false, false, false],
-      ['🏛 ICMS',                     brl(calc.icmsVal),   icmsPct>0?`${(icmsPct*100).toFixed(1).replace('.',',')}% por fora`:'Diferido / não incide', false, false, false],
-      ['💰 Lucro',                    brl(calc.lucro),     `Margem ${pctFmt(calc.margemReal*100)} s/ receita`, true, false, false],
-    ];
-
-    document.getElementById('custoTable').innerHTML=rows.map(([label,val,det,isTotal,,isCredito])=>{
-      if(!label) return `<tr class="${isTotal?'subtotal':''}"><td colspan="2" class="row-label" style="font-size:.7rem;color:#6b7280;">${det}</td><td>${val}</td></tr>`;
-      const corCredito = isCredito ? 'style="color:#15803d;"' : '';
-      const bgVPO = label.includes('VPO') ? 'style="opacity:.6;"' : '';
-      return `<tr class="${isTotal?'subtotal':''}" ${bgVPO}>
-        <td class="row-label" ${corCredito}>${label}<span class="row-detalhe">${det}</span></td>
-        <td ${corCredito}>${val}</td></tr>`;
-    }).join('');
-
-    // Semáforo
-    const faixas=[
-      {l:'< 10% — Ruim',c:'sem-ruim',a:mr<10},
-      {l:'10–12% — Mínimo',c:'sem-minimo',a:mr>=10&&mr<12},
-      {l:'12–18% — Saudável',c:'sem-sauda',a:mr>=12&&mr<18},
-      {l:'18–22% — Bom',c:'sem-bom',a:mr>=18&&mr<22},
-      {l:'> 22% — Excelente',c:'sem-excel',a:mr>=22},
-    ];
-    document.getElementById('semaforo').innerHTML=faixas.map(f=>`<div class="sem-item ${f.c}${f.a?' sem-atual':''}">${f.l}</div>`).join('');
-
-    // ── ABA SENSIBILIDADE ──
-    // Tabela 1: Peso × Margem
-    const pesos=[pesoEmb*0.7,pesoEmb*0.85,pesoEmb,pesoEmb*1.0].map(v=>Math.round(v));
-    const margens=[5,10,15,20,25];
-    let tbl1='<tr><th>Peso \\ Margem</th>'+margens.map(m=>`<th>${m}%</th>`).join('')+'</tr>';
-    pesos.forEach(p=>{
-      const isAtual=p===Math.round(pesoEmb);
-      tbl1+=`<tr${isAtual?' class="atual-row"':''}>`;
-      tbl1+=`<td>${p} t</td>`;
-      margens.forEach(m=>{
-        const r=calcularPreco(km,durSec,cenarioPadrao.pct,{...params,pesoEmb:p,margemPct:m/100});
-        const mr2=r.margemReal*100;
-        const cls=isAtual&&m===Math.round(margemPct*100)?'sens-good':mr2>=18?'sens-good':mr2>=10?'sens-warn':'sens-bad';
-        tbl1+=`<td class="${cls}">${brl(r.precTonTotal)}</td>`;
-      });
-      tbl1+='</tr>';
-    });
-    document.getElementById('sensTable').innerHTML=tbl1;
-
-    // Tabela 2: Combustível × Margem
-    const combs=[params.combLitro*0.85,params.combLitro*0.92,params.combLitro,params.combLitro*1.08,params.combLitro*1.15];
-    let tbl2='<tr><th>Comb. \\ Margem</th>'+margens.map(m=>`<th>${m}%</th>`).join('')+'</tr>';
-    combs.forEach((cb,ci)=>{
-      const isAtual=ci===2;
-      tbl2+=`<tr${isAtual?' class="atual-row"':''}>`;
-      tbl2+=`<td>R$${cb.toFixed(2).replace('.',',')}/L</td>`;
-      margens.forEach(m=>{
-        const r=calcularPreco(km,durSec,cenarioPadrao.pct,{...params,combLitro:cb,margemPct:m/100});
-        const mr2=r.margemReal*100;
-        const cls=isAtual&&m===Math.round(margemPct*100)?'sens-good':mr2>=18?'sens-good':mr2>=10?'sens-warn':'sens-bad';
-        tbl2+=`<td class="${cls}">${brl(r.precTonTotal)}</td>`;
-      });
-      tbl2+='</tr>';
-    });
-    document.getElementById('sensTableComb').innerHTML=tbl2;
+    // Precificação
+    atualizarPrecificacao(calc,params,km,durSec,cenario);
+    renderCenarios(km,durSec,params,margemPct);
+    renderSensibilidade(km,durSec,params,cenario.pct);
 
     rw.style.display='block';
     showResult('prec');
