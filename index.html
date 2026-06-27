@@ -29,6 +29,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f6fa; colo
 .field-icon.origin { background: #dbeafe; }
 .field-icon.destination { background: #dcfce7; }
 .connector-line { position: absolute; left: 17px; top: 42px; width: 2px; height: 12px; background: #e5e7eb; }
+.uf-select { width: 68px !important; flex: 0 0 68px !important; padding: 0 6px !important; font-size: 0.82rem !important; color: #374151 !important; }
 
 input[type="text"], select { flex: 1; height: 42px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; color: #111827; font-size: 0.9rem; padding: 0 14px; transition: border-color .15s, box-shadow .15s; outline: none; font-family: inherit; width: 100%; }
 input:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); background: #fff; }
@@ -230,6 +231,16 @@ select { cursor: pointer; }
         <svg viewBox="0 0 24 24" fill="#2563eb" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
       </div>
       <input type="text" id="origem" placeholder="Cidade, endereço ou -23.5489, -46.6388" autocomplete="off" />
+      <select id="ufOrigem" class="uf-select" onchange="atualizarIcms()">
+        <option value="">UF</option>
+        <option>AC</option><option>AL</option><option>AM</option><option>AP</option>
+        <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+        <option>GO</option><option>MA</option><option>MG</option><option>MS</option>
+        <option>MT</option><option>PA</option><option>PB</option><option>PE</option>
+        <option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+        <option>RO</option><option>RR</option><option>RS</option><option>SC</option>
+        <option>SE</option><option>SP</option><option>TO</option>
+      </select>
       <div class="connector-line"></div>
     </div>
     <div class="field-row">
@@ -237,6 +248,16 @@ select { cursor: pointer; }
         <svg viewBox="0 0 24 24" fill="#16a34a" width="18" height="18"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
       </div>
       <input type="text" id="destino" placeholder="Cidade, endereço ou -22.9068, -43.1729" autocomplete="off" />
+      <select id="ufDestino" class="uf-select" onchange="atualizarIcms()">
+        <option value="">UF</option>
+        <option>AC</option><option>AL</option><option>AM</option><option>AP</option>
+        <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+        <option>GO</option><option>MA</option><option>MG</option><option>MS</option>
+        <option>MT</option><option>PA</option><option>PB</option><option>PE</option>
+        <option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+        <option>RO</option><option>RR</option><option>RS</option><option>SC</option>
+        <option>SE</option><option>SP</option><option>TO</option>
+      </select>
     </div>
   </div>
 
@@ -308,7 +329,7 @@ select { cursor: pointer; }
       <input type="text" id="pedagioTotalInput" placeholder="R$ 0,00" inputmode="numeric" />
     </div>
     <div class="field-group">
-      <label>Margem desejada (%)</label>
+      <label>Margem EBIT desejada (%)</label>
       <input type="text" id="margem" value="15,0%" />
     </div>
   </div>
@@ -476,7 +497,7 @@ select { cursor: pointer; }
       </div>
       <div class="hero-right">
         <div class="hero-badge" id="precScenario">—</div>
-        <div class="hero-right-label">Margem s/ receita</div>
+        <div class="hero-right-label">Margem EBIT s/ receita</div>
         <div class="margem-val" id="margemReal">—</div>
       </div>
     </div>
@@ -508,7 +529,7 @@ select { cursor: pointer; }
             <div class="mercado-item-val" id="mercadoDiff">—</div>
           </div>
           <div class="mercado-item">
-            <div class="mercado-item-label">Margem s/ mercado</div>
+            <div class="mercado-item-label">Margem EBIT s/ mercado</div>
             <div class="mercado-item-val" id="mercadoMargem">—</div>
           </div>
           <div class="mercado-item">
@@ -750,15 +771,55 @@ function atualizarPeso(){
 }
 
 function inferirUF(txt){
-  const match=txt.match(/,\s*([A-Z]{2})\s*(?:,|$)/); return match?match[1]:null;
+  if(!txt) return null;
+  // Tenta sigla direta: "Itapeva, SP, Brasil" ou "SP"
+  const matchSigla=txt.match(/,\s*([A-Z]{2})\s*(?:,|$)/);
+  if(matchSigla) return matchSigla[1];
+  // Mapeia nomes por extenso que o Google retorna
+  const mapa={
+    'são paulo':'SP','estado de são paulo':'SP',
+    'minas gerais':'MG','estado de minas gerais':'MG',
+    'paraná':'PR','estado do paraná':'PR',
+    'santa catarina':'SC','estado de santa catarina':'SC',
+    'rio grande do sul':'RS','estado do rio grande do sul':'RS',
+    'mato grosso do sul':'MS','estado de mato grosso do sul':'MS',
+    'mato grosso':'MT','estado de mato grosso':'MT',
+    'goiás':'GO','estado de goiás':'GO',
+    'rio de janeiro':'RJ','estado do rio de janeiro':'RJ',
+    'espírito santo':'ES','estado do espírito santo':'ES',
+    'bahia':'BA','estado da bahia':'BA',
+    'pernambuco':'PE','estado de pernambuco':'PE',
+    'ceará':'CE','estado do ceará':'CE',
+    'maranhão':'MA','estado do maranhão':'MA',
+    'pará':'PA','estado do pará':'PA',
+    'amazonas':'AM','estado do amazonas':'AM',
+    'rondônia':'RO','estado de rondônia':'RO',
+    'tocantins':'TO','estado do tocantins':'TO',
+    'piauí':'PI','estado do piauí':'PI',
+    'alagoas':'AL','estado de alagoas':'AL',
+    'sergipe':'SE','estado de sergipe':'SE',
+    'paraíba':'PB','estado da paraíba':'PB',
+    'rio grande do norte':'RN','estado do rio grande do norte':'RN',
+    'acre':'AC','estado do acre':'AC',
+    'amapá':'AP','estado do amapá':'AP',
+    'roraima':'RR','estado de roraima':'RR',
+    'distrito federal':'DF',
+  };
+  const lower=txt.toLowerCase();
+  for(const [nome,uf] of Object.entries(mapa)){
+    if(lower.includes(nome)) return uf;
+  }
+  return null;
 }
 
 function atualizarIcms(){
   const av=document.getElementById('avisoIcms');
-  if(origemUF&&destinoUF&&ICMS_TABLE[origemUF]?.[destinoUF]!==undefined){
-    const t=ICMS_TABLE[origemUF][destinoUF];
-    document.getElementById('icms').value=t;
-    av.textContent=`ICMS ${origemUF}→${destinoUF}: ${t}% preenchido automaticamente — verifique diferimento`;
+  const ufO=document.getElementById('ufOrigem').value;
+  const ufD=document.getElementById('ufDestino').value;
+  if(ufO&&ufD&&ICMS_TABLE[ufO]?.[ufD]!==undefined){
+    const t=ICMS_TABLE[ufO][ufD];
+    document.getElementById('icms').value=t.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2})+'%';
+    av.textContent=`ICMS ${ufO}→${ufD}: ${t}% preenchido automaticamente — verifique diferimento`;
     av.style.display='block';
   } else { av.style.display='none'; }
 }
@@ -778,14 +839,33 @@ function buildWaypoint(txt,placeId){
   return {address:txt+(txt.toLowerCase().includes('brasil')?'':', Brasil')};
 }
 
+function setUF(selectId, uf){
+  const sel=document.getElementById(selectId);
+  if(!uf){sel.value='';return;}
+  sel.value=uf;
+  if(sel.value!==uf) sel.value='';
+}
+
 function initAutocomplete(){
   const opts={componentRestrictions:{country:'br'},fields:['place_id','name','formatted_address']};
   const acO=new google.maps.places.Autocomplete(document.getElementById('origem'),opts);
-  acO.addListener('place_changed',()=>{const p=acO.getPlace();origemPlaceId=p.place_id||null;origemUF=inferirUF(p.formatted_address||'');atualizarIcms();cachedRoute=null;});
+  acO.addListener('place_changed',()=>{
+    const p=acO.getPlace();
+    origemPlaceId=p.place_id||null;
+    setUF('ufOrigem',inferirUF(p.formatted_address||''));
+    atualizarIcms();
+    cachedRoute=null;
+  });
   const acD=new google.maps.places.Autocomplete(document.getElementById('destino'),opts);
-  acD.addListener('place_changed',()=>{const p=acD.getPlace();destinoPlaceId=p.place_id||null;destinoUF=inferirUF(p.formatted_address||'');atualizarIcms();cachedRoute=null;});
-  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;origemUF=null;cachedRoute=null;});
-  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;destinoUF=null;cachedRoute=null;});
+  acD.addListener('place_changed',()=>{
+    const p=acD.getPlace();
+    destinoPlaceId=p.place_id||null;
+    setUF('ufDestino',inferirUF(p.formatted_address||''));
+    atualizarIcms();
+    cachedRoute=null;
+  });
+  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;cachedRoute=null;});
+  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;cachedRoute=null;});
 }
 
 async function getRoute(){
@@ -828,42 +908,53 @@ function calcularPreco(km, durSec, retVazioFrac, params){
   const combVolta=(km/consVazio)*combLitro*retVazioFrac;
   const combTotal=combIda+combVolta;
 
+  // Pedágio ida: tratamento conforme pedagioTipoParam (VPO ou embutido)
+  // Pedágio volta: SEMPRE entra no faturamento — gera crédito PC, incide comissão e ICMS
+  // (o VPO cobre apenas a ida; a volta é custo precificado no frete)
+  const pedagioVolta = pedagio * retVazioFrac;
+
   let custoOp,baseCredito,creditoPC,custoLiq,receitaBase,receitaComIcms,precTon,pedagioTon;
 
   if(pedagioTipoParam==='vpo'){
-    custoOp=cfViagem+cvViagem+combTotal;
-    baseCredito=cfCredViagem+cvCredViagem+combTotal;
-    creditoPC=baseCredito*piscofinsPct;
-    custoLiq=custoOp-creditoPC;
-    const den=1-margemPct-piscofinsPct-comissaoPct;
+    // Ida: VPO — fora do faturamento, sem crédito, sem comissão
+    // Volta: no faturamento — gera crédito PC
+    custoOp = cfViagem+cvViagem+combTotal;
+    baseCredito = cfCredViagem+cvCredViagem+combTotal+pedagioVolta;
+    creditoPC = baseCredito*piscofinsPct;
+    custoLiq = custoOp-creditoPC;
+    const den = 1-margemPct-piscofinsPct-comissaoPct;
     if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
-    receitaBase=custoLiq/den;
-    receitaComIcms=icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
-    precTon=receitaComIcms/pesoEmb;
-    pedagioTon=pedagio/pesoEmb;
+    // Volta entra na receita base; ida (VPO) fica fora
+    receitaBase = (custoLiq+pedagioVolta)/den;
+    receitaComIcms = icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
+    precTon = receitaComIcms/pesoEmb;
+    pedagioTon = pedagio/pesoEmb; // ida VPO destacada ao cliente
   } else {
-    custoOp=cfViagem+cvViagem+combTotal;
-    baseCredito=cfCredViagem+cvCredViagem+combTotal+pedagio;
-    creditoPC=baseCredito*piscofinsPct;
-    custoLiq=custoOp-creditoPC;
-    const den=1-margemPct-piscofinsPct-comissaoPct;
+    // Ida: embutida no frete — gera crédito PC
+    // Volta: também embutida — gera crédito PC
+    custoOp = cfViagem+cvViagem+combTotal;
+    baseCredito = cfCredViagem+cvCredViagem+combTotal+pedagio+pedagioVolta;
+    creditoPC = baseCredito*piscofinsPct;
+    custoLiq = custoOp-creditoPC;
+    const den = 1-margemPct-piscofinsPct-comissaoPct;
     if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
-    receitaBase=(custoLiq+pedagio)/den;
-    receitaComIcms=icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
-    precTon=receitaComIcms/pesoEmb;
-    pedagioTon=0;
+    receitaBase = (custoLiq+pedagio+pedagioVolta)/den;
+    receitaComIcms = icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
+    precTon = receitaComIcms/pesoEmb;
+    pedagioTon = 0;
   }
 
-  const impostosFat=receitaBase*piscofinsPct;
-  const comissao=receitaBase*comissaoPct;
-  const icmsVal=receitaComIcms-receitaBase;
-  const custoOpTotal=pedagioTipoParam==='embutido'?custoOp+pedagio:custoOp;
-  const lucro=receitaComIcms-custoOpTotal-impostosFat-comissao-icmsVal;
-  const margemReal=lucro/receitaComIcms;
+  const impostosFat = receitaBase*piscofinsPct;
+  const comissao = receitaBase*comissaoPct;
+  const icmsVal = receitaComIcms-receitaBase;
+  const pedagioNoFaturamento = pedagioTipoParam==='vpo'?pedagioVolta:(pedagio+pedagioVolta);
+  const custoOpTotal = custoOp+pedagioNoFaturamento;
+  const lucro = receitaComIcms-custoOpTotal-impostosFat-comissao-icmsVal;
+  const margemReal = lucro/receitaComIcms;
 
   return {precTon,pedagioTon,precTonTotal:precTon+pedagioTon,
           receitaBase,receitaComIcms,custoOp,custoOpTotal,custoLiq,creditoPC,baseCredito,
-          combIda,combVolta,combTotal,cfViagem,cvViagem,
+          combIda,combVolta,combTotal,cfViagem,cvViagem,pedagioVolta,
           impostosFat,comissao,icmsVal,lucro,margemReal,tOp,tIda,cfHora};
 }
 
@@ -968,22 +1059,27 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
 
   // Decomposição de custos
   const tOpFmt=formatHoras(calc.tOp);
-  const pedagioLinha=pedagioTipo==='vpo'
-    ?['🛣 Pedágio (VPO — à parte)',brl(pedagio),'Não integra o faturamento',false,true]
-    :['🛣 Pedágio (embutido)',brl(pedagio),`Gera crédito PC: ${brl(pedagio*piscofinsPct)}`,false,false];
+  const pedagioIdaLinha=pedagioTipo==='vpo'
+    ?['🛣 Pedágio ida (VPO — à parte)',brl(pedagio),'Não integra o faturamento',false,true]
+    :['🛣 Pedágio ida (embutido)',brl(pedagio),`Gera crédito PC: ${brl(pedagio*piscofinsPct)}`,false,false];
+  const pedagioVoltaLinha=cenario.pct>0
+    ?['🛣 Pedágio volta (faturado)',brl(calc.pedagioVolta),`${brl(pedagio)} × ${(cenario.pct*100).toFixed(0)}% retorno vazio — gera crédito PC: ${brl(calc.pedagioVolta*piscofinsPct)}`,false,false]
+    :null;
+
   const rows=[
     ['⛽ Combustível ida',brl(calc.combIda),`${km} km ÷ ${consCarreg} km/L × R$${combLitro.toFixed(2).replace('.',',')}`,false,false],
     ['⛽ Combustível volta vazia',brl(calc.combVolta),`${km} km ÷ ${consVazio} km/L × ${(cenario.pct*100).toFixed(0)}% retorno vazio`,false,false],
     ['🔧 Custo variável (CV)',brl(calc.cvViagem),`R$${(params.cvCred+params.cvSem).toFixed(4).replace('.',',')} /km × ${km} km × (1+${(cenario.pct*100).toFixed(0)}%)`,false,false],
     ['🏗 Custo fixo rateado',brl(calc.cfViagem),`R$${calc.cfHora.toFixed(4).replace('.',',')} /h × ${tOpFmt} operação`,false,false],
-    pedagioLinha,
+    pedagioIdaLinha,
+    ...(pedagioVoltaLinha?[pedagioVoltaLinha]:[]),
     ['',brl(calc.custoOp),'Custo operacional bruto',true,false],
     ['✅ Crédito PIS/COFINS','('+brl(calc.creditoPC)+')',`Base ${brl(calc.baseCredito)} × ${(piscofinsPct*100).toFixed(2).replace('.',',')}%`,false,true],
-    ['',brl(calc.custoLiq),'Custo líquido',true,false],
+    ['',brl(calc.custoLiq),'Custo líquido (EBIT antes de tributos sobre faturamento)',true,false],
     ['📋 PIS/COFINS débito',brl(calc.impostosFat),`${(piscofinsPct*100).toFixed(2).replace('.',',')}% s/ receita base`,false,false],
     ['👷 Comissão motorista',brl(calc.comissao),`${(comissaoPct*100).toFixed(0)}% s/ receita base`,false,false],
     ['🏛 ICMS',brl(calc.icmsVal),icmsPct>0?`${(icmsPct*100).toFixed(1).replace('.',',')}% por fora`:'Diferido / não incide',false,false],
-    ['💰 Lucro',brl(calc.lucro),`Margem ${pctFmt(calc.margemReal*100)} s/ receita`,true,false],
+    ['💰 EBIT (lucro operacional)',brl(calc.lucro),`Margem EBIT ${pctFmt(calc.margemReal*100)} s/ receita`,true,false],
   ];
   document.getElementById('custoTable').innerHTML=rows.map(([label,val,det,isTotal,isCredito])=>{
     if(!label) return `<tr class="subtotal"><td colspan="2" class="row-label" style="font-size:.7rem;color:#6b7280;">${det}</td><td>${val}</td></tr>`;
@@ -994,11 +1090,11 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
 
   // Semáforo
   const faixas=[
-    {l:'< 10% — Ruim',c:'sem-ruim',a:mr<10},
-    {l:'10–12% — Mínimo',c:'sem-minimo',a:mr>=10&&mr<12},
-    {l:'12–18% — Saudável',c:'sem-sauda',a:mr>=12&&mr<18},
-    {l:'18–22% — Bom',c:'sem-bom',a:mr>=18&&mr<22},
-    {l:'> 22% — Excelente',c:'sem-excel',a:mr>=22},
+    {l:'EBIT < 10% — Ruim',c:'sem-ruim',a:mr<10},
+    {l:'EBIT 10–12% — Mínimo',c:'sem-minimo',a:mr>=10&&mr<12},
+    {l:'EBIT 12–18% — Saudável',c:'sem-sauda',a:mr>=12&&mr<18},
+    {l:'EBIT 18–22% — Bom',c:'sem-bom',a:mr>=18&&mr<22},
+    {l:'EBIT > 22% — Excelente',c:'sem-excel',a:mr>=22},
   ];
   document.getElementById('semaforo').innerHTML=faixas.map(f=>`<div class="sem-item ${f.c}${f.a?' sem-atual':''}">${f.l}</div>`).join('');
 
@@ -1097,6 +1193,20 @@ async function calcular(){
   const origemTxt=document.getElementById('origem').value.trim();
   const destinoTxt=document.getElementById('destino').value.trim();
   if(!origemTxt||!destinoTxt){mostrarErro('Preencha a origem e o destino.');return;}
+
+  // Valida UFs para cálculo de ICMS
+  const ufO=document.getElementById('ufOrigem').value;
+  const ufD=document.getElementById('ufDestino').value;
+  const icmsManual=parseBR(document.getElementById('icms').value);
+  if((!ufO||!ufD)&&icmsManual===0&&!diferimentoAtivo){
+    mostrarErro('Selecione o estado (UF) de origem e destino para calcular o ICMS automaticamente, ou informe o ICMS manualmente.');
+    // Destaca os selects vazios
+    if(!ufO) document.getElementById('ufOrigem').style.borderColor='#dc2626';
+    if(!ufD) document.getElementById('ufDestino').style.borderColor='#dc2626';
+    return;
+  }
+  document.getElementById('ufOrigem').style.borderColor='';
+  document.getElementById('ufDestino').style.borderColor='';
 
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span> Calculando...';
