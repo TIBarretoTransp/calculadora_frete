@@ -407,6 +407,16 @@ select { cursor: pointer; }
       <input type="text" id="horasDescarga" value="2" />
     </div>
   </div>
+  <div class="grid-2">
+    <div class="field-group">
+      <label>Ociosidade (%) — chuva, manutenção, espera</label>
+      <input type="text" id="ociosidade" value="15,0%" />
+    </div>
+    <div class="field-group">
+      <label>Capacidade produtiva efetiva (h/mês)</label>
+      <input type="text" id="capacidadeEfetiva" value="—" disabled style="background:#f3f4f6;color:#6b7280;" />
+    </div>
+  </div>
   <div class="divider"></div>
   <div class="section-label">Parâmetros financeiros e consumo</div>
   <div class="grid-3">
@@ -480,7 +490,7 @@ select { cursor: pointer; }
       </div>
     </div>
     <div class="alerta" id="alertaPiso"></div>
-    <div class="fonte-nota">Piso conforme <a href="https://anttlegis.antt.gov.br/action/ActionDatalegis.php?acao=abrirTextoAto&tipo=RES&numeroAto=00006076&seqAto=000&valorAno=2026&orgao=DG%2FANTT%2FMT&cod_modulo=623&cod_menu=9230" target="_blank">Res. ANTT 6.076/2026</a> — Tabela A.</div>
+    <div class="fonte-nota">Piso conforme <a href="https://anttlegis.antt.gov.br/action/ActionDatalegis.php?acao=abrirTextoAto&link=S&tipo=POR&numeroAto=00000004&seqAto=000&valorAno=2026&orgao=SUROC%2FANTT%2FMT&cod_modulo=161&cod_menu=7817" target="_blank">Portaria SUROC nº 4/2026 (20/mar/2026)</a> — Tabela A · Diesel ref. R$ 7,35/L.</div>
   </div>
 
   <!-- PRECIFICAÇÃO -->
@@ -607,15 +617,17 @@ const GOOGLE_KEY = 'AIzaSyAk_wJ0jAxN4jMJ6BoVB9BoRogVP8otTNQ';
 const CAPACIDADE = {2:10,3:14,4:19,5:27,6:30,7:35,9:45};
 const EIXOS_LISTA = [2,3,4,5,6,7,9];
 
+// Tabela A — Portaria SUROC nº 4, de 20 de março de 2026 (diesel ref. R$ 7,35/L)
+// CC (carga e descarga) inalterados desde Res. 6.076/2026; CCD reajustados pelo gatilho do diesel
 const TABELA_ANTT = {
-  granelSolido:  {2:{CCD:3.7123,CC:444.84},3:{CCD:4.7427,CC:533.36},4:{CCD:5.3672,CC:576.59},5:{CCD:6.1859,CC:642.10},6:{CCD:6.8058,CC:656.76},7:{CCD:7.4505,CC:792.30},9:{CCD:8.5300,CC:877.83}},
-  granelLiquido: {2:{CCD:3.7837,CC:455.84},3:{CCD:4.8350,CC:550.10},4:{CCD:5.5162,CC:600.27},5:{CCD:6.3480,CC:669.38},6:{CCD:6.9730,CC:685.45},7:{CCD:7.5842,CC:811.76},9:{CCD:8.6837,CC:902.80}},
-  frigorificada: {2:{CCD:4.3423,CC:502.29},3:{CCD:5.5387,CC:601.96},4:{CCD:6.3226,CC:663.16},5:{CCD:7.2435,CC:732.07},6:{CCD:7.9625,CC:745.94},7:{CCD:8.8534,CC:949.16},9:{CCD:10.0426,CC:1030.58}},
-  conteinerizada:{3:{CCD:4.7164,CC:526.13},4:{CCD:5.2975,CC:557.42},5:{CCD:6.1243,CC:625.16},6:{CCD:6.7426,CC:639.38},7:{CCD:7.4482,CC:791.67},9:{CCD:8.4497,CC:855.76}},
-  geral:         {2:{CCD:3.6815,CC:436.39},3:{CCD:4.7062,CC:523.33},4:{CCD:5.3386,CC:568.72},5:{CCD:6.1604,CC:635.08},6:{CCD:6.7774,CC:648.95},7:{CCD:7.4902,CC:803.22},9:{CCD:8.5104,CC:872.44}},
-  neogranel:     {2:{CCD:3.3488,CC:436.39},3:{CCD:4.7048,CC:522.93},4:{CCD:5.3649,CC:575.96},5:{CCD:6.1604,CC:635.08},6:{CCD:6.7774,CC:648.95},7:{CCD:7.4902,CC:803.22},9:{CCD:8.5104,CC:872.44}},
-  perigosaGranel:{2:{CCD:4.4560,CC:587.98},3:{CCD:5.4960,CC:672.64},4:{CCD:6.1560,CC:720.08},5:{CCD:6.9747,CC:792.78},6:{CCD:7.5946,CC:806.10},7:{CCD:8.2569,CC:957.93},9:{CCD:9.3441,CC:1047.62}},
-  perigosaGeral: {2:{CCD:4.4186,CC:577.56},3:{CCD:5.4567,CC:661.98},4:{CCD:6.0853,CC:710.41},5:{CCD:6.9019,CC:783.32},6:{CCD:7.5219,CC:795.39},7:{CCD:8.1876,CC:951.08},9:{CCD:9.2547,CC:1038.48}},
+  granelSolido:   {2:{CCD:4.0338,CC:444.84},3:{CCD:5.1660,CC:533.36},4:{CCD:5.8464,CC:576.59},5:{CCD:6.7381,CC:642.10},6:{CCD:7.4408,CC:656.76},7:{CCD:8.0855,CC:792.30},9:{CCD:9.2662,CC:877.83}},
+  granelLiquido:  {2:{CCD:4.1052,CC:455.84},3:{CCD:5.2583,CC:550.10},4:{CCD:5.9955,CC:600.27},5:{CCD:6.9002,CC:669.38},6:{CCD:7.6080,CC:685.45},7:{CCD:8.2192,CC:811.76},9:{CCD:9.4199,CC:902.80}},
+  frigorificada:  {2:{CCD:4.7442,CC:502.29},3:{CCD:6.0679,CC:601.96},4:{CCD:6.9216,CC:663.16},5:{CCD:7.9337,CC:732.07},6:{CCD:8.7563,CC:745.94},7:{CCD:9.6471,CC:949.16},9:{CCD:10.9629,CC:1030.58}},
+  conteinerizada: {                          3:{CCD:5.1397,CC:526.13},4:{CCD:5.7767,CC:557.42},5:{CCD:6.6765,CC:625.16},6:{CCD:7.3776,CC:639.38},7:{CCD:8.0832,CC:791.67},9:{CCD:9.1859,CC:855.76}},
+  geral:          {2:{CCD:4.0031,CC:436.39},3:{CCD:5.1295,CC:523.33},4:{CCD:5.8178,CC:568.72},5:{CCD:6.7126,CC:635.08},6:{CCD:7.4124,CC:648.95},7:{CCD:8.1252,CC:803.22},9:{CCD:9.2466,CC:872.44}},
+  neogranel:      {2:{CCD:3.6028,CC:436.39},3:{CCD:5.1281,CC:522.93},4:{CCD:5.8441,CC:575.96},5:{CCD:6.7126,CC:635.08},6:{CCD:7.4124,CC:648.95},7:{CCD:8.1252,CC:803.22},9:{CCD:9.2466,CC:872.44}},
+  perigosaGranel: {2:{CCD:4.7775,CC:587.98},3:{CCD:5.9193,CC:679.12},4:{CCD:6.6352,CC:727.28},5:{CCD:7.5269,CC:792.80},6:{CCD:8.2296,CC:807.45},7:{CCD:8.8919,CC:947.84},9:{CCD:10.0803,CC:1035.49}},
+  perigosaGeral:  {2:{CCD:4.3647,CC:531.01},3:{CCD:5.5008,CC:620.58},4:{CCD:6.2246,CC:670.91},5:{CCD:7.1193,CC:737.27},6:{CCD:7.8191,CC:751.14},7:{CCD:8.5496,CC:910.26},9:{CCD:9.6787,CC:981.58}},
 };
 
 const ICMS_TABLE = {
@@ -717,9 +729,22 @@ function toggleDiferimento(){
   }
 }
 
+function atualizarCapacidadeEfetiva(){
+  const diasUteis=parseBR(document.getElementById('diasUteis').value)||22;
+  const horasDia=parseBR(document.getElementById('horasDia').value)||11;
+  const ociosidade=parseBR(document.getElementById('ociosidade').value)/100;
+  const capTeorica=diasUteis*horasDia;
+  const capEfetiva=capTeorica*(1-ociosidade);
+  document.getElementById('capacidadeEfetiva').value=capEfetiva.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' h ('+capTeorica.toLocaleString('pt-BR')+'h teórica)';
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   ['pedagioEixo','pedagioTotalInput','precoMercado','cvCredito','cvSemCredito','cfCredito','cfSemCredito','combLitro'].forEach(aplicarMascaraBRL);
-  ['margem','comissao','piscofinsPct','icms'].forEach(aplicarMascaraPCT);
+  ['margem','comissao','piscofinsPct','icms','ociosidade'].forEach(aplicarMascaraPCT);
+  ['diasUteis','horasDia','ociosidade'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',atualizarCapacidadeEfetiva);
+  });
+  atualizarCapacidadeEfetiva();
 });
 
 // ── UI ──
@@ -895,11 +920,15 @@ async function getRoute(){
 function calcularPreco(km, durSec, retVazioFrac, params){
   const {cvCred,cvSem,cfCred,cfSem,diasUteis,horasDia,horasCarga,horasDescarga,
          consCarreg,consVazio,combLitro,comissaoPct,piscofinsPct,icmsPct,margemPct,
-         pesoEmb,pedagio,pedagioTipoParam,velMedia} = params;
+         pesoEmb,pedagio,pedagioTipoParam,velMedia,ociosidadePct} = params;
 
   const tIda  = tempoMode==='api'?durSec/3600:km/velMedia;
   const tOp   = horasCarga+tIda+horasDescarga+(tIda*retVazioFrac);
-  const cfHora= (cfCred+cfSem)/(diasUteis*horasDia);
+  // Capacidade produtiva efetiva = horas teóricas × (1 - ociosidade)
+  // A ociosidade reduz as horas realmente disponíveis para gerar receita,
+  // então o mesmo custo fixo mensal precisa ser coberto por menos horas produtivas
+  const capacidadeEfetiva = diasUteis*horasDia*(1-(ociosidadePct||0));
+  const cfHora= (cfCred+cfSem)/(capacidadeEfetiva||1);
   const cfViagem= cfHora*tOp;
   const cfCredViagem=(cfCred/(cfCred+cfSem||1))*cfViagem;
   const cvViagem=(cvCred+cvSem)*km*(1+retVazioFrac);
@@ -1070,7 +1099,7 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
     ['⛽ Combustível ida',brl(calc.combIda),`${km} km ÷ ${consCarreg} km/L × R$${combLitro.toFixed(2).replace('.',',')}`,false,false],
     ['⛽ Combustível volta vazia',brl(calc.combVolta),`${km} km ÷ ${consVazio} km/L × ${(cenario.pct*100).toFixed(0)}% retorno vazio`,false,false],
     ['🔧 Custo variável (CV)',brl(calc.cvViagem),`R$${(params.cvCred+params.cvSem).toFixed(4).replace('.',',')} /km × ${km} km × (1+${(cenario.pct*100).toFixed(0)}%)`,false,false],
-    ['🏗 Custo fixo rateado',brl(calc.cfViagem),`R$${calc.cfHora.toFixed(4).replace('.',',')} /h × ${tOpFmt} operação`,false,false],
+    ['🏗 Custo fixo rateado',brl(calc.cfViagem),`R$${calc.cfHora.toFixed(4).replace('.',',')} /h (já considerando ${(params.ociosidadePct*100).toFixed(0)}% ociosidade) × ${tOpFmt}`,false,false],
     pedagioIdaLinha,
     ...(pedagioVoltaLinha?[pedagioVoltaLinha]:[]),
     ['',brl(calc.custoOp),'Custo operacional bruto',true,false],
@@ -1238,6 +1267,7 @@ async function calcular(){
       combLitro:parseBR(document.getElementById('combLitro').value)||7.8,
       comissaoPct:parseBR(document.getElementById('comissao').value)/100,
       piscofinsPct:parseBR(document.getElementById('piscofinsPct').value)/100,
+      ociosidadePct:parseBR(document.getElementById('ociosidade').value)/100,
       velMedia:parseBR(document.getElementById('velMedia').value)||70,
       icmsPct,margemPct,pesoEmb,pedagio,numEixos,
       pedagioTipoParam:pedagioTipo,
