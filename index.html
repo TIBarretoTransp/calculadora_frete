@@ -200,6 +200,48 @@ select { cursor: pointer; }
 .fonte-nota a { color: #2563eb; text-decoration: none; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Operação — seletor na Cotação */
+.op-select-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .7rem .9rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 10px; }
+.op-select-box label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #64748b; white-space: nowrap; }
+.op-select-box select { height: 38px; font-size: .85rem; background: #fff; }
+.op-select-hint { font-size: .66rem; color: #94a3b8; margin-top: 5px; }
+
+/* Link discreto no cabeçalho */
+.header { justify-content: space-between; }
+
+/* Faixa "voltar" do painel de operações */
+.op-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+.op-back-link { font-size: .78rem; color: #6b7280; text-decoration: none; font-weight: 600; cursor: pointer; }
+.op-back-link:hover { color: #2563eb; }
+
+/* Cards de operação */
+.op-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: .9rem 1rem; margin-bottom: .7rem; }
+.op-card.op-ativa { border-color: #93c5fd; background: #f8faff; }
+.op-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.op-card-nome { font-size: .92rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 7px; }
+.op-tag-ativa { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 20px; }
+.op-card-resumo { font-size: .76rem; color: #6b7280; line-height: 1.6; }
+.op-card-actions { display: flex; gap: 6px; margin-top: .7rem; }
+.op-mini-btn { font-size: .72rem; font-weight: 600; border: 1px solid #e5e7eb; background: #f9fafb; color: #374151; padding: 5px 10px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+.op-mini-btn:hover { background: #f3f4f6; }
+.op-mini-btn.danger { color: #dc2626; }
+.op-mini-btn.danger:hover { background: #fef2f2; border-color: #fecaca; }
+.op-mini-btn.primary { color: #2563eb; }
+.op-mini-btn.primary:hover { background: #eff6ff; border-color: #bfdbfe; }
+
+.op-form-box { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem; background: #fafbfc; }
+.op-form-title { font-size: .8rem; font-weight: 700; color: #111827; margin-bottom: .8rem; }
+
+.op-save-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-radius: 10px; padding: .7rem .9rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+.op-save-bar:empty { display: none; }
+.op-save-bar-text { font-size: .76rem; }
+.op-banner-ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.op-banner-ok .op-save-bar-text { color: #15803d; }
+.op-banner-pending { background: #fffbeb; border: 1px solid #fde68a; }
+.op-banner-pending .op-save-bar-text { color: #92400e; }
+.op-banner-warn { background: #fef2f2; border: 1px solid #fecaca; }
+.op-banner-warn .op-save-bar-text { color: #b91c1c; }
 </style>
 </head>
 <body>
@@ -215,14 +257,20 @@ select { cursor: pointer; }
   </div>
 </div>
 
-<!-- ABAS: COTAÇÃO primeiro, PREMISSAS segundo -->
+<!-- ABAS: COTAÇÃO primeiro, OPERAÇÕES DE CUSTO segundo -->
 <div class="main-tabs">
-  <button class="main-tab active" onclick="showMain('cotacao')">🚛 Cotação</button>
-  <button class="main-tab" onclick="showMain('premissas')">⚙ Premissas</button>
+  <button class="main-tab active" id="mtCotacao" onclick="showMain('cotacao')">🚛 Cotação</button>
+  <button class="main-tab" id="mtOperacoes" onclick="showMain('operacoes')">📋 Operações de custo</button>
 </div>
 
 <!-- COTAÇÃO -->
 <div class="main-panel active" id="panelCotacao">
+
+  <div class="op-select-box">
+    <label>Operação</label>
+    <select id="selectOperacaoCotacao" onchange="selecionarOperacao(this.value)" style="flex:1;"></select>
+  </div>
+  <div class="op-select-hint" id="opSelectHintCotacao"></div>
 
   <div class="section-label">Rota</div>
   <div class="route-fields">
@@ -352,7 +400,7 @@ select { cursor: pointer; }
 </div>
 
 <!-- PREMISSAS -->
-<div class="main-panel" id="panelPremissas">
+<div class="main-panel" id="panelPremissas" style="display:none !important;">
   <div class="section-label">Custos variáveis (R$/km)</div>
   <div class="grid-2">
     <div class="field-group">
@@ -444,6 +492,123 @@ select { cursor: pointer; }
     </div>
   </div>
   <button class="calc-btn" style="background:#475569;" onclick="showMain('cotacao')">← Voltar para cotação</button>
+</div>
+
+<!-- OPERAÇÕES DE CUSTO -->
+<div class="main-panel" id="panelOperacoes">
+  <div class="op-topbar">
+    <div class="section-label" style="margin-bottom:0;">Operações de custo cadastradas</div>
+    <a class="op-back-link" onclick="showMain('cotacao')">← Voltar</a>
+  </div>
+  <p style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">
+    Cada operação guarda seu próprio conjunto de custos (CV, CF, combustível, consumo, tempo, ociosidade, comissão, PIS/COFINS).
+    Ao escolher uma operação na tela de Cotação, esses valores são usados automaticamente no cálculo — sem precisar reeditar nada.
+    O cadastro é compartilhado com a equipe via <code>operacoes.json</code> no repositório.
+  </p>
+
+  <div class="op-save-bar" id="opBannerPublicacao"></div>
+
+  <div id="listaOperacoes"></div>
+
+  <button class="op-mini-btn primary" style="margin-top:.4rem;padding:8px 14px;font-size:.78rem;" onclick="abrirFormNovaOperacao()">+ Nova operação</button>
+
+  <div class="op-form-box" id="opFormBox" style="display:none;margin-top:1rem;">
+    <div class="op-form-title" id="opFormTitulo">Nova operação</div>
+    <input type="hidden" id="opFormId" value="" />
+    <div class="grid-2">
+      <div class="field-group" style="grid-column:1/-1;">
+        <label>Nome da operação</label>
+        <input type="text" id="opNome" placeholder="Ex.: Insumos agrícolas, Nova operação X" />
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-label">Custos variáveis (R$/km)</div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>CV com crédito PIS/COFINS (R$/km)</label>
+        <input type="text" id="opCvCredito" value="R$ 1,20" />
+      </div>
+      <div class="field-group">
+        <label>CV sem crédito PIS/COFINS (R$/km)</label>
+        <input type="text" id="opCvSemCredito" value="R$ 0,53" />
+      </div>
+    </div>
+    <div class="section-label">Custos fixos mensais (R$/mês) — por caminhão</div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>CF com crédito PIS/COFINS (R$/mês)</label>
+        <input type="text" id="opCfCredito" value="R$ 0,00" />
+      </div>
+      <div class="field-group">
+        <label>CF sem crédito PIS/COFINS (R$/mês)</label>
+        <input type="text" id="opCfSemCredito" value="R$ 15.000,00" />
+      </div>
+    </div>
+    <div class="section-label">Parâmetros de tempo</div>
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="opBtnAPI" onclick="opSetTempoMode('api')">Usar tempo da API</button>
+      <button class="toggle-btn" id="opBtnVelMedia" onclick="opSetTempoMode('vel')">Usar velocidade média</button>
+    </div>
+    <div class="grid-3">
+      <div class="field-group" id="opCampoVelMedia" style="display:none;">
+        <label>Velocidade média (km/h)</label>
+        <input type="text" id="opVelMedia" value="70" />
+      </div>
+      <div class="field-group">
+        <label>Dias úteis no mês</label>
+        <input type="text" id="opDiasUteis" value="22" />
+      </div>
+      <div class="field-group">
+        <label>Horas disponíveis/dia</label>
+        <input type="text" id="opHorasDia" value="11" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Horas de carregamento (h)</label>
+        <input type="text" id="opHorasCarga" value="2" />
+      </div>
+      <div class="field-group">
+        <label>Horas de descarregamento (h)</label>
+        <input type="text" id="opHorasDescarga" value="2" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Ociosidade (%) — chuva, manutenção, espera</label>
+        <input type="text" id="opOciosidade" value="15,0%" />
+      </div>
+    </div>
+    <div class="section-label">Parâmetros financeiros e consumo</div>
+    <div class="grid-3">
+      <div class="field-group">
+        <label>Comissão motorista (%)</label>
+        <input type="text" id="opComissao" value="12,0%" />
+      </div>
+      <div class="field-group">
+        <label>PIS/COFINS débito (%)</label>
+        <input type="text" id="opPiscofinsPct" value="9,25%" />
+      </div>
+      <div class="field-group">
+        <label>Combustível (R$/L)</label>
+        <input type="text" id="opCombLitro" value="R$ 7,80" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Consumo carregado (km/L)</label>
+        <input type="text" id="opConsCarreg" value="1,7" />
+      </div>
+      <div class="field-group">
+        <label>Consumo vazio (km/L)</label>
+        <input type="text" id="opConsVazio" value="2,3" />
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:.4rem;">
+      <button class="calc-btn" style="flex:1;" onclick="salvarFormOperacao()">Salvar operação</button>
+      <button class="calc-btn" style="flex:1;background:#94a3b8;" onclick="fecharFormOperacao()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- RESULTADOS -->
@@ -651,6 +816,333 @@ let pedagioMode='eixo', pedagioTipo='vpo', tempoMode='api';
 let cenarioSelecionado=2; // índice do cenário ativo (padrão: Razoável)
 let cachedRoute=null, cachedParams=null, cachedKm=0, cachedDurSec=0;
 
+// ── Operações de custo (cadastro compartilhado via JSON + rascunho local) ──
+const OPERACOES_JSON_URL='./operacoes.json';
+const OPERACOES_DRAFT_KEY='barreto_operacoes_draft_v1';
+const OPERACAO_ATUAL_STORAGE_KEY='barreto_operacao_atual_v1';
+const CAMPOS_OPERACAO=['cvCredito','cvSemCredito','cfCredito','cfSemCredito','diasUteis','horasDia','horasCarga','horasDescarga','ociosidade','comissao','piscofinsPct','combLitro','consCarreg','consVazio','velMedia'];
+let operacoes={};
+let operacaoAtualId=null;
+let opFormTempoMode='api';
+let operacoesPublicadasStr='';
+let temAlteracoesNaoPublicadas=false;
+let origemDosDados='publicado'; // 'publicado' | 'draft' | 'fallback'
+
+function operacaoPadrao(nome){
+  return {
+    nome:nome||'Nova operação',
+    cvCredito:'R$ 1,20', cvSemCredito:'R$ 0,53',
+    cfCredito:'R$ 0,00', cfSemCredito:'R$ 15.000,00',
+    diasUteis:'22', horasDia:'11', horasCarga:'2', horasDescarga:'2',
+    ociosidade:'15,0%', comissao:'12,0%', piscofinsPct:'9,25%',
+    combLitro:'R$ 7,80', consCarreg:'1,7', consVazio:'2,3',
+    velMedia:'70', tempoMode:'api'
+  };
+}
+
+function operacoesFallback(){
+  const id='op_default';
+  const obj={};
+  obj[id]=operacaoPadrao('Insumos agrícolas (Itapeva)');
+  return obj;
+}
+
+async function buscarOperacoesPublicadas(){
+  const res=await fetch(OPERACOES_JSON_URL,{cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.json();
+}
+
+async function carregarOperacoes(){
+  let publicadas=null;
+  try{
+    publicadas=await buscarOperacoesPublicadas();
+    if(!publicadas||Object.keys(publicadas).length===0) throw new Error('JSON vazio');
+    operacoesPublicadasStr=JSON.stringify(publicadas);
+  }catch(e){
+    console.warn('Não foi possível carregar operacoes.json — usando padrão local.',e);
+    publicadas=operacoesFallback();
+    operacoesPublicadasStr=JSON.stringify(publicadas);
+    origemDosDados='fallback';
+  }
+
+  let draft=null;
+  try{
+    const raw=localStorage.getItem(OPERACOES_DRAFT_KEY);
+    draft=raw?JSON.parse(raw):null;
+  }catch(e){ draft=null; }
+
+  if(draft && JSON.stringify(draft)!==operacoesPublicadasStr){
+    operacoes=draft;
+    temAlteracoesNaoPublicadas=true;
+    if(origemDosDados!=='fallback') origemDosDados='draft';
+  } else {
+    operacoes=JSON.parse(JSON.stringify(publicadas));
+    temAlteracoesNaoPublicadas=false;
+    localStorage.removeItem(OPERACOES_DRAFT_KEY);
+  }
+
+  operacaoAtualId=localStorage.getItem(OPERACAO_ATUAL_STORAGE_KEY);
+  if(!operacaoAtualId||!operacoes[operacaoAtualId]){
+    operacaoAtualId=Object.keys(operacoes)[0];
+  }
+}
+
+function salvarOperacoesDraft(){
+  temAlteracoesNaoPublicadas = JSON.stringify(operacoes)!==operacoesPublicadasStr;
+  if(temAlteracoesNaoPublicadas){
+    localStorage.setItem(OPERACOES_DRAFT_KEY,JSON.stringify(operacoes));
+  } else {
+    localStorage.removeItem(OPERACOES_DRAFT_KEY);
+  }
+  renderBannerPublicacao();
+}
+
+function salvarOperacaoAtualStorage(){
+  if(operacaoAtualId) localStorage.setItem(OPERACAO_ATUAL_STORAGE_KEY,operacaoAtualId);
+}
+
+function baixarOperacoesJson(){
+  const blob=new Blob([JSON.stringify(operacoes,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='operacoes.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  operacoesPublicadasStr=JSON.stringify(operacoes);
+  temAlteracoesNaoPublicadas=false;
+  localStorage.removeItem(OPERACOES_DRAFT_KEY);
+  origemDosDados='publicado';
+  renderBannerPublicacao();
+}
+
+async function recarregarOperacoesPublicadas(){
+  if(temAlteracoesNaoPublicadas){
+    if(!confirm('Isso descarta as alterações locais não publicadas e recarrega o cadastro do operacoes.json. Continuar?')) return;
+  }
+  localStorage.removeItem(OPERACOES_DRAFT_KEY);
+  await carregarOperacoes();
+  popularSelectOperacoes();
+  aplicarOperacaoAosCampos(operacaoAtualId);
+  renderListaOperacoes();
+}
+
+function renderBannerPublicacao(){
+  const el=document.getElementById('opBannerPublicacao');
+  const hint=document.getElementById('opSelectHintCotacao');
+  if(origemDosDados==='fallback'){
+    if(el){
+      el.className='op-save-bar op-banner-warn';
+      el.innerHTML=`<div class="op-save-bar-text">⚠ Não foi possível carregar <strong>operacoes.json</strong> do repositório (rodando fora do GitHub Pages, ou arquivo ainda não publicado). Usando cadastro padrão local, não compartilhado.</div>`;
+    }
+    if(hint) hint.innerHTML='⚠ Cadastro de custos não sincronizado com a equipe — veja "Operações de custo".';
+  } else if(temAlteracoesNaoPublicadas){
+    if(el){
+      el.className='op-save-bar op-banner-pending';
+      el.innerHTML=`<div class="op-save-bar-text">🟡 Há alterações neste navegador que ainda não foram publicadas para a equipe.</div>
+        <div style="display:flex;gap:6px;">
+          <button class="op-mini-btn primary" onclick="baixarOperacoesJson()">⬇ Baixar operacoes.json</button>
+          <button class="op-mini-btn" onclick="recarregarOperacoesPublicadas()">↺ Descartar e recarregar</button>
+        </div>`;
+    }
+    if(hint) hint.innerHTML='🟡 Este navegador tem alterações de custo ainda não publicadas para a equipe.';
+  } else {
+    if(el){
+      el.className='op-save-bar op-banner-ok';
+      el.innerHTML=`<div class="op-save-bar-text">🟢 Sincronizado com o cadastro publicado da equipe.</div>
+        <button class="op-mini-btn" onclick="recarregarOperacoesPublicadas()">↺ Recarregar</button>`;
+    }
+    if(hint) hint.innerHTML='';
+  }
+}
+
+function popularSelectOperacoes(){
+  const sel=document.getElementById('selectOperacaoCotacao');
+  const atual=sel.value;
+  sel.innerHTML='';
+  Object.keys(operacoes).forEach(id=>{
+    const opt=document.createElement('option');
+    opt.value=id; opt.textContent=operacoes[id].nome;
+    sel.appendChild(opt);
+  });
+  sel.value=operacoes[atual]?atual:operacaoAtualId;
+}
+
+function aplicarOperacaoAosCampos(id){
+  const op=operacoes[id]; if(!op) return;
+  document.getElementById('cvCredito').value=op.cvCredito;
+  document.getElementById('cvSemCredito').value=op.cvSemCredito;
+  document.getElementById('cfCredito').value=op.cfCredito;
+  document.getElementById('cfSemCredito').value=op.cfSemCredito;
+  document.getElementById('diasUteis').value=op.diasUteis;
+  document.getElementById('horasDia').value=op.horasDia;
+  document.getElementById('horasCarga').value=op.horasCarga;
+  document.getElementById('horasDescarga').value=op.horasDescarga;
+  document.getElementById('ociosidade').value=op.ociosidade;
+  document.getElementById('comissao').value=op.comissao;
+  document.getElementById('piscofinsPct').value=op.piscofinsPct;
+  document.getElementById('combLitro').value=op.combLitro;
+  document.getElementById('consCarreg').value=op.consCarreg;
+  document.getElementById('consVazio').value=op.consVazio;
+  document.getElementById('velMedia').value=op.velMedia;
+  setTempoMode(op.tempoMode||'api');
+  atualizarCapacidadeEfetiva();
+}
+
+function selecionarOperacao(id){
+  if(!operacoes[id]) return;
+  operacaoAtualId=id;
+  salvarOperacaoAtualStorage();
+  aplicarOperacaoAosCampos(id);
+  const selP=document.getElementById('selectOperacaoCotacao');
+  if(selP) selP.value=id;
+}
+
+function lerCamposPremissasAtuais(){
+  const obj={};
+  CAMPOS_OPERACAO.forEach(campo=>{ obj[campo]=document.getElementById(campo).value; });
+  obj.tempoMode=tempoMode;
+  return obj;
+}
+
+// ── Gestão de operações (aba Operações de custo) ──
+function renderListaOperacoes(){
+  renderBannerPublicacao();
+  const wrap=document.getElementById('listaOperacoes');
+  wrap.innerHTML='';
+  Object.keys(operacoes).forEach(id=>{
+    const op=operacoes[id];
+    const ativa=id===operacaoAtualId;
+    const card=document.createElement('div');
+    card.className='op-card'+(ativa?' op-ativa':'');
+    card.innerHTML=`
+      <div class="op-card-head">
+        <div class="op-card-nome">${op.nome} ${ativa?'<span class="op-tag-ativa">Em uso na cotação</span>':''}</div>
+      </div>
+      <div class="op-card-resumo">
+        CV: ${op.cvCredito} (c/ créd.) · ${op.cvSemCredito} (s/ créd.) &nbsp;|&nbsp; CF: ${op.cfSemCredito}/mês<br>
+        Combustível ${op.combLitro}/L · Consumo ${op.consCarreg} km/L (carreg.) / ${op.consVazio} km/L (vazio)<br>
+        Comissão ${op.comissao} · Ociosidade ${op.ociosidade} · Tempo: ${op.tempoMode==='vel'?'velocidade média ('+op.velMedia+' km/h)':'API Google'}
+      </div>
+      <div class="op-card-actions">
+        ${ativa?'':'<button class="op-mini-btn primary" onclick="selecionarOperacaoEIrParaCotacao(\''+id+'\')">Usar na cotação</button>'}
+        <button class="op-mini-btn" onclick="abrirFormEditarOperacao('${id}')">Editar</button>
+        <button class="op-mini-btn" onclick="duplicarOperacao('${id}')">Duplicar</button>
+        <button class="op-mini-btn danger" onclick="excluirOperacao('${id}')">Excluir</button>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+
+function selecionarOperacaoEIrParaCotacao(id){
+  selecionarOperacao(id);
+  renderListaOperacoes();
+}
+
+function opSetTempoMode(m){
+  opFormTempoMode=m;
+  document.getElementById('opBtnAPI').classList.toggle('active',m==='api');
+  document.getElementById('opBtnVelMedia').classList.toggle('active',m==='vel');
+  document.getElementById('opCampoVelMedia').style.display=m==='vel'?'':'none';
+}
+
+function abrirFormNovaOperacao(){
+  document.getElementById('opFormId').value='';
+  document.getElementById('opFormTitulo').textContent='Nova operação';
+  const padrao=operacaoPadrao('');
+  preencherFormOperacao(padrao);
+  document.getElementById('opFormBox').style.display='block';
+  document.getElementById('opNome').focus();
+}
+
+function abrirFormEditarOperacao(id){
+  const op=operacoes[id]; if(!op) return;
+  document.getElementById('opFormId').value=id;
+  document.getElementById('opFormTitulo').textContent='Editar operação';
+  preencherFormOperacao(op);
+  document.getElementById('opFormBox').style.display='block';
+  document.getElementById('opFormBox').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function preencherFormOperacao(op){
+  document.getElementById('opNome').value=op.nome||'';
+  document.getElementById('opCvCredito').value=op.cvCredito;
+  document.getElementById('opCvSemCredito').value=op.cvSemCredito;
+  document.getElementById('opCfCredito').value=op.cfCredito;
+  document.getElementById('opCfSemCredito').value=op.cfSemCredito;
+  document.getElementById('opDiasUteis').value=op.diasUteis;
+  document.getElementById('opHorasDia').value=op.horasDia;
+  document.getElementById('opHorasCarga').value=op.horasCarga;
+  document.getElementById('opHorasDescarga').value=op.horasDescarga;
+  document.getElementById('opOciosidade').value=op.ociosidade;
+  document.getElementById('opComissao').value=op.comissao;
+  document.getElementById('opPiscofinsPct').value=op.piscofinsPct;
+  document.getElementById('opCombLitro').value=op.combLitro;
+  document.getElementById('opConsCarreg').value=op.consCarreg;
+  document.getElementById('opConsVazio').value=op.consVazio;
+  document.getElementById('opVelMedia').value=op.velMedia;
+  opSetTempoMode(op.tempoMode||'api');
+}
+
+function fecharFormOperacao(){
+  document.getElementById('opFormBox').style.display='none';
+}
+
+function salvarFormOperacao(){
+  const nome=document.getElementById('opNome').value.trim();
+  if(!nome){ alert('Informe um nome para a operação.'); return; }
+  const id=document.getElementById('opFormId').value||('op_'+Date.now());
+  operacoes[id]={
+    nome,
+    cvCredito:document.getElementById('opCvCredito').value,
+    cvSemCredito:document.getElementById('opCvSemCredito').value,
+    cfCredito:document.getElementById('opCfCredito').value,
+    cfSemCredito:document.getElementById('opCfSemCredito').value,
+    diasUteis:document.getElementById('opDiasUteis').value,
+    horasDia:document.getElementById('opHorasDia').value,
+    horasCarga:document.getElementById('opHorasCarga').value,
+    horasDescarga:document.getElementById('opHorasDescarga').value,
+    ociosidade:document.getElementById('opOciosidade').value,
+    comissao:document.getElementById('opComissao').value,
+    piscofinsPct:document.getElementById('opPiscofinsPct').value,
+    combLitro:document.getElementById('opCombLitro').value,
+    consCarreg:document.getElementById('opConsCarreg').value,
+    consVazio:document.getElementById('opConsVazio').value,
+    velMedia:document.getElementById('opVelMedia').value,
+    tempoMode:opFormTempoMode
+  };
+  salvarOperacoesDraft();
+  fecharFormOperacao();
+  popularSelectOperacoes();
+  renderListaOperacoes();
+  // Se a operação editada é a que está em uso, atualiza os campos da cotação também
+  if(id===operacaoAtualId) aplicarOperacaoAosCampos(id);
+  if(!operacoes[operacaoAtualId]) selecionarOperacao(id);
+}
+
+function duplicarOperacao(id){
+  const op=operacoes[id]; if(!op) return;
+  const novoId='op_'+Date.now();
+  operacoes[novoId]={...op,nome:op.nome+' (cópia)'};
+  salvarOperacoesDraft();
+  popularSelectOperacoes();
+  renderListaOperacoes();
+}
+
+function excluirOperacao(id){
+  if(Object.keys(operacoes).length<=1){ alert('É preciso manter ao menos uma operação cadastrada.'); return; }
+  if(!confirm('Excluir a operação "'+operacoes[id].nome+'"? Essa ação não pode ser desfeita.')) return;
+  delete operacoes[id];
+  salvarOperacoesDraft();
+  if(operacaoAtualId===id){
+    operacaoAtualId=Object.keys(operacoes)[0];
+    salvarOperacaoAtualStorage();
+    aplicarOperacaoAosCampos(operacaoAtualId);
+  }
+  popularSelectOperacoes();
+  renderListaOperacoes();
+}
+
 // ── Helpers ──
 function parseBR(v){
   const s=(v||'0').toString().replace(/R\$\s*/g,'').replace(/%/g,'').replace(/\./g,'').replace(',','.');
@@ -738,20 +1230,28 @@ function atualizarCapacidadeEfetiva(){
   document.getElementById('capacidadeEfetiva').value=capEfetiva.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' h ('+capTeorica.toLocaleString('pt-BR')+'h teórica)';
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  ['pedagioEixo','pedagioTotalInput','precoMercado','cvCredito','cvSemCredito','cfCredito','cfSemCredito','combLitro'].forEach(aplicarMascaraBRL);
-  ['margem','comissao','piscofinsPct','icms','ociosidade'].forEach(aplicarMascaraPCT);
+document.addEventListener('DOMContentLoaded',async()=>{
+  ['pedagioEixo','pedagioTotalInput','precoMercado','cvCredito','cvSemCredito','cfCredito','cfSemCredito','combLitro',
+   'opCvCredito','opCvSemCredito','opCfCredito','opCfSemCredito','opCombLitro'].forEach(aplicarMascaraBRL);
+  ['margem','comissao','piscofinsPct','icms','ociosidade','opOciosidade','opComissao','opPiscofinsPct'].forEach(aplicarMascaraPCT);
   ['diasUteis','horasDia','ociosidade'].forEach(id=>{
     document.getElementById(id).addEventListener('input',atualizarCapacidadeEfetiva);
   });
   atualizarCapacidadeEfetiva();
+
+  await carregarOperacoes();
+  popularSelectOperacoes();
+  aplicarOperacaoAosCampos(operacaoAtualId);
+  renderBannerPublicacao();
 });
 
 // ── UI ──
 function showMain(tab){
   document.getElementById('panelCotacao').classList.toggle('active',tab==='cotacao');
-  document.getElementById('panelPremissas').classList.toggle('active',tab==='premissas');
-  document.querySelectorAll('.main-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&tab==='cotacao')||(i===1&&tab==='premissas')));
+  document.getElementById('panelOperacoes').classList.toggle('active',tab==='operacoes');
+  document.getElementById('mtCotacao').classList.toggle('active',tab==='cotacao');
+  document.getElementById('mtOperacoes').classList.toggle('active',tab==='operacoes');
+  if(tab==='operacoes') renderListaOperacoes();
 }
 
 function showResult(tab){

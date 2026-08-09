@@ -1,0 +1,21 @@
+{
+  "op_default": {
+    "nome": "Insumos agrícolas (Itapeva)",
+    "cvCredito": "R$ 1,20",
+    "cvSemCredito": "R$ 0,53",
+    "cfCredito": "R$ 0,00",
+    "cfSemCredito": "R$ 15.000,00",
+    "diasUteis": "22",
+    "horasDia": "11",
+    "horasCarga": "2",
+    "horasDescarga": "2",
+    "ociosidade": "15,0%",
+    "comissao": "12,0%",
+    "piscofinsPct": "9,25%",
+    "combLitro": "R$ 7,80",
+    "consCarreg": "1,7",
+    "consVazio": "2,3",
+    "velMedia": "70",
+    "tempoMode": "api"
+  }
+}
