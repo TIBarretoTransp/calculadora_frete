@@ -727,6 +727,7 @@ select { cursor: pointer; }
         <div class="hero-tag">💰 Preço sugerido — R$/tonelada</div>
         <div class="hero-val" id="precTon">—</div>
         <div class="hero-sub" id="precSub">—</div>
+        <div class="hero-sub" id="precSemIcms" style="display:none;font-weight:700;"></div>
       </div>
       <div class="hero-right">
         <div class="hero-badge" id="precScenario">—</div>
@@ -1875,6 +1876,15 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
   document.getElementById('precSub').textContent=`Receita ${brl(calc.receitaComIcms)} · ${pesoEmb} t · ${pedagioDesc}`;
   document.getElementById('precScenario').textContent=cenario.label;
 
+  const precSemIcmsEl=document.getElementById('precSemIcms');
+  if(icmsPct>0){
+    const precTonSemIcms=(calc.receitaBase/pesoEmb)+calc.pedagioTon;
+    precSemIcmsEl.textContent=`Sem ICMS: ${brl(precTonSemIcms)}/t · útil pra passar ao cliente`;
+    precSemIcmsEl.style.display='block';
+  } else {
+    precSemIcmsEl.style.display='none';
+  }
+
   const mr=calc.margemReal*100;
   const mrEl=document.getElementById('margemReal');
   mrEl.textContent=pctFmt(mr);
@@ -1890,7 +1900,9 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
     // Calcular margem ao preço de mercado
     const recMerc=precoMerc*pesoEmb;
     const recBaseMerc=icmsPct>0?recMerc*(1-icmsPct):recMerc;
-    const lucroMerc=recMerc-calc.custoOpTotal-(recBaseMerc*piscofinsPct)-(recBaseMerc*comissaoPct)-(recMerc-recBaseMerc);
+    // Mesmo ajuste do cálculo principal: custoOpTotal é bruto (sem o crédito de PIS/COFINS já
+    // descontado), então o crédito precisa ser somado de volta aqui pra não descontar duas vezes.
+    const lucroMerc=recMerc-calc.custoOpTotal-(recBaseMerc*piscofinsPct)+calc.creditoPC-(recBaseMerc*comissaoPct)-(recMerc-recBaseMerc);
     const margemMerc=lucroMerc/recMerc*100;
 
     const diff=precoMerc-calc.precTonTotal;
