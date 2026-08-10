@@ -309,6 +309,25 @@ select { cursor: pointer; }
     </div>
   </div>
 
+  <div class="op-select-hint" style="margin-top:.5rem;">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:#6b7280;">
+      <input type="checkbox" id="chkDistanciaManual" onchange="toggleDistanciaManual()" style="width:auto;" />
+      A rota do Google está ruim? Informar distância e pedágio manualmente
+    </label>
+  </div>
+  <div class="grid-2" id="camposDistanciaManual" style="display:none;margin-top:.6rem;">
+    <div class="field-group">
+      <label>Distância (km) — só ida</label>
+      <input type="text" id="distanciaManualKm" placeholder="Ex.: 380" inputmode="numeric" />
+    </div>
+    <div class="field-group">
+      <label>Tempo</label>
+      <div style="height:40px;display:flex;align-items:center;font-size:.78rem;color:#6b7280;">
+        Calculado por velocidade média (não usa a API nesse modo)
+      </div>
+    </div>
+  </div>
+
   <div class="divider"></div>
   <div class="section-label">Veículo e carga</div>
   <div class="field-group">
@@ -1711,6 +1730,14 @@ function invalidarRotaCache(){
   if(hint) hint.textContent='';
 }
 
+function toggleDistanciaManual(){
+  const ativo=document.getElementById('chkDistanciaManual').checked;
+  document.getElementById('camposDistanciaManual').style.display=ativo?'':'none';
+  const hint=document.getElementById('pedagioAutoHint');
+  if(ativo&&hint) hint.textContent='📍 Modo manual: sem estimativa automática de pedágio — informe direto no campo abaixo.';
+  else if(hint) hint.textContent='';
+}
+
 function aplicarPedagioAutomatico(pedagioEstimadoPorEixo){
   const hint=document.getElementById('pedagioAutoHint');
   if(pedagioEstimadoPorEixo===null||pedagioEstimadoPorEixo===undefined){
@@ -2096,9 +2123,25 @@ async function calcular(){
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span> Calculando...';
 
+  const distanciaManualAtiva=document.getElementById('chkDistanciaManual').checked;
+  const tempoModeOriginal=tempoMode;
+
   try{
-    const {km,durSec,origemLabel,destinoLabel,pedagioEstimadoPorEixo}=await getRoute();
-    aplicarPedagioAutomatico(pedagioEstimadoPorEixo);
+    let km,durSec,origemLabel,destinoLabel,pedagioEstimadoPorEixo=null;
+    if(distanciaManualAtiva){
+      const kmManual=parseBR(document.getElementById('distanciaManualKm').value);
+      if(!kmManual||kmManual<=0){ mostrarErro('Informe a distância manual (km) — a rota do Google está desativada nesse modo.'); return; }
+      km=Math.round(kmManual);
+      durSec=null;
+      origemLabel=origemTxt.split(',')[0];
+      destinoLabel=destinoTxt.split(',')[0];
+      tempoMode='vel'; // sem API de rota, o tempo só pode vir da velocidade média
+    } else {
+      const rota=await getRoute();
+      km=rota.km; durSec=rota.durSec; origemLabel=rota.origemLabel; destinoLabel=rota.destinoLabel;
+      pedagioEstimadoPorEixo=rota.pedagioEstimadoPorEixo;
+      aplicarPedagioAutomatico(pedagioEstimadoPorEixo);
+    }
 
     const numEixos=parseInt(document.getElementById('numEixos').value);
     const pesoEmb=parseBR(document.getElementById('pesoEmb').value)||CAPACIDADE[numEixos]||30;
@@ -2201,6 +2244,7 @@ async function calcular(){
 
   } catch(e){ mostrarErro(e.message); }
   finally{
+    tempoMode=tempoModeOriginal;
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Calcular';
   }
