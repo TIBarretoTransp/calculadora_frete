@@ -1789,52 +1789,48 @@ function calcularPreco(km, durSec, retVazioFrac, params){
   // Pedágio volta: SEMPRE entra no faturamento — gera crédito PC, incide comissão e ICMS
   // (o VPO cobre apenas a ida; a volta é custo precificado no frete)
   const pedagioVolta = pedagio * retVazioFrac;
+  const pedagioNoFaturamento = pedagioTipoParam==='vpo'?pedagioVolta:(pedagio+pedagioVolta);
 
-  let custoOp,baseCredito,creditoPC,custoLiq,receitaBase,receitaComIcms,precTon,pedagioTon;
+  let baseCredito,creditoPC,custoLiq,receitaBase,receitaComIcms,precTon,pedagioTon;
+
+  // custoOp = custo operacional "puro" (CF + CV + combustível), sem pedágio.
+  // custoOpTotal = custo operacional bruto TOTAL, já incluindo o pedágio faturado
+  // (é essa base "com pedágio" que aparece na tabela, e sobre ela que o crédito é aplicado).
+  const custoOp = cfViagem+cvViagem+combTotal;
+  const custoOpTotal = custoOp+pedagioNoFaturamento;
 
   if(pedagioTipoParam==='vpo'){
     // Ida: VPO — fora do faturamento, sem crédito, sem comissão
     // Volta: no faturamento — gera crédito PC
-    custoOp = cfViagem+cvViagem+combTotal;
     baseCredito = cfCredViagem+cvCredViagem+combTotal+pedagioVolta;
-    creditoPC = baseCredito*piscofinsPct;
-    custoLiq = custoOp-creditoPC;
-    const den = 1-margemPct-piscofinsPct-comissaoPct;
-    if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
-    // Volta entra na receita base; ida (VPO) fica fora
-    receitaBase = (custoLiq+pedagioVolta)/den;
-    receitaComIcms = icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
-    precTon = receitaComIcms/pesoEmb;
-    pedagioTon = pedagio/pesoEmb; // ida VPO destacada ao cliente
   } else {
     // Ida: embutida no frete — gera crédito PC
     // Volta: também embutida — gera crédito PC
-    custoOp = cfViagem+cvViagem+combTotal;
     baseCredito = cfCredViagem+cvCredViagem+combTotal+pedagio+pedagioVolta;
-    creditoPC = baseCredito*piscofinsPct;
-    custoLiq = custoOp-creditoPC;
-    const den = 1-margemPct-piscofinsPct-comissaoPct;
-    if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
-    receitaBase = (custoLiq+pedagio+pedagioVolta)/den;
-    receitaComIcms = icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
-    precTon = receitaComIcms/pesoEmb;
-    pedagioTon = 0;
   }
+  creditoPC = baseCredito*piscofinsPct;
+  // Custo líquido = custo operacional bruto TOTAL (já com pedágio) menos o crédito de PIS/COFINS.
+  // Diferente da versão anterior, aqui o pedágio já está dentro antes de aplicar o crédito —
+  // então basta subtrair as linhas seguintes em sequência pra chegar no EBIT, sem "voltar" o crédito depois.
+  custoLiq = custoOpTotal-creditoPC;
+
+  const den = 1-margemPct-piscofinsPct-comissaoPct;
+  if(den<=0) throw new Error('Margem + impostos + comissão ultrapassa 100%.');
+  receitaBase = custoLiq/den;
+  receitaComIcms = icmsPct>0?receitaBase/(1-icmsPct):receitaBase;
+  precTon = receitaComIcms/pesoEmb;
+  pedagioTon = pedagioTipoParam==='vpo'?pedagio/pesoEmb:0; // ida VPO destacada ao cliente
 
   const impostosFat = receitaBase*piscofinsPct;
   const comissao = receitaBase*comissaoPct;
   const icmsVal = receitaComIcms-receitaBase;
-  const pedagioNoFaturamento = pedagioTipoParam==='vpo'?pedagioVolta:(pedagio+pedagioVolta);
-  const custoOpTotal = custoOp+pedagioNoFaturamento;
-  // O preço foi calculado sobre o custo líquido (já descontado o crédito de PIS/COFINS).
-  // Para o lucro realizado bater com a margem-alvo, o crédito precisa ser somado de volta aqui
-  // (senão ele é descontado do custo na precificação e "descontado de novo" implicitamente no lucro).
-  const lucro = receitaComIcms-custoOpTotal-impostosFat+creditoPC-comissao-icmsVal;
+  // Agora totalmente aditivo: cada linha da tabela subtrai direto, sem crédito "reaparecendo" depois.
+  const lucro = receitaComIcms-custoLiq-impostosFat-comissao-icmsVal;
   const margemReal = lucro/receitaComIcms;
 
   return {precTon,pedagioTon,precTonTotal:precTon+pedagioTon,
           receitaBase,receitaComIcms,custoOp,custoOpTotal,custoLiq,creditoPC,baseCredito,
-          combIda,combVolta,combTotal,cfViagem,cvViagem,pedagioVolta,
+          combIda,combVolta,combTotal,cfViagem,cvViagem,pedagioVolta,pedagioNoFaturamento,
           impostosFat,comissao,icmsVal,lucro,margemReal,tOp,tIda,cfHora};
 }
 
@@ -1900,9 +1896,7 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
     // Calcular margem ao preço de mercado
     const recMerc=precoMerc*pesoEmb;
     const recBaseMerc=icmsPct>0?recMerc*(1-icmsPct):recMerc;
-    // Mesmo ajuste do cálculo principal: custoOpTotal é bruto (sem o crédito de PIS/COFINS já
-    // descontado), então o crédito precisa ser somado de volta aqui pra não descontar duas vezes.
-    const lucroMerc=recMerc-calc.custoOpTotal-(recBaseMerc*piscofinsPct)+calc.creditoPC-(recBaseMerc*comissaoPct)-(recMerc-recBaseMerc);
+    const lucroMerc=recMerc-calc.custoLiq-(recBaseMerc*piscofinsPct)-(recBaseMerc*comissaoPct)-(recMerc-recBaseMerc);
     const margemMerc=lucroMerc/recMerc*100;
 
     const diff=precoMerc-calc.precTonTotal;
@@ -1964,7 +1958,7 @@ function atualizarPrecificacao(calc,params,km,durSec,cenario){
     ['🏗 Custo fixo rateado',brl(calc.cfViagem),`R$${calc.cfHora.toFixed(4).replace('.',',')} /h (já considerando ${(params.ociosidadePct*100).toFixed(0)}% ociosidade) × ${tOpFmt}`,false,false],
     pedagioIdaLinha,
     ...(pedagioVoltaLinha?[pedagioVoltaLinha]:[]),
-    ['',brl(calc.custoOp),'Custo operacional bruto',true,false],
+    ['',brl(calc.custoOpTotal),'Custo operacional bruto (já com pedágio faturado)',true,false],
     ['✅ Crédito PIS/COFINS','('+brl(calc.creditoPC)+')',`Base ${brl(calc.baseCredito)} × ${(piscofinsPct*100).toFixed(2).replace('.',',')}%`,false,true],
     ['',brl(calc.custoLiq),'Custo líquido (EBIT antes de tributos sobre faturamento)',true,false],
     ['📋 PIS/COFINS débito',brl(calc.impostosFat),`${(piscofinsPct*100).toFixed(2).replace('.',',')}% s/ receita base`,false,false],
