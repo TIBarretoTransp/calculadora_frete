@@ -381,6 +381,7 @@ select { cursor: pointer; }
       <input type="text" id="margem" value="15,0%" />
     </div>
   </div>
+  <div class="op-select-hint" id="pedagioAutoHint"></div>
 
   <div class="divider"></div>
   <div class="section-label">Preço de mercado (opcional)</div>
@@ -813,6 +814,7 @@ const CENARIOS = [
 
 let origemPlaceId=null, destinoPlaceId=null, origemUF=null, destinoUF=null;
 let pedagioMode='eixo', pedagioTipo='vpo', tempoMode='api';
+let pedagioEixoEditadoManualmente=false, pedagioTotalEditadoManualmente=false;
 let cenarioSelecionado=2; // índice do cenário ativo (padrão: Razoável)
 let cachedRoute=null, cachedParams=null, cachedKm=0, cachedDurSec=0;
 
@@ -1243,6 +1245,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
   popularSelectOperacoes();
   aplicarOperacaoAosCampos(operacaoAtualId);
   renderBannerPublicacao();
+
+  document.getElementById('pedagioEixo').addEventListener('input',()=>{pedagioEixoEditadoManualmente=true;});
+  document.getElementById('pedagioTotalInput').addEventListener('input',()=>{pedagioTotalEditadoManualmente=true;});
 });
 
 // ── UI ──
@@ -1266,6 +1271,9 @@ function setPedagioMode(m){
   document.getElementById('btnPedTotal').classList.toggle('active',m==='total');
   document.getElementById('campoEixo').style.display=m==='eixo'?'':'none';
   document.getElementById('campoTotal').style.display=m==='total'?'':'none';
+  if(cachedRoute&&cachedRoute.pedagioEstimadoPorEixo!=null){
+    aplicarPedagioAutomatico(cachedRoute.pedagioEstimadoPorEixo);
+  }
 }
 
 function setPedagioTipo(t){
@@ -1379,7 +1387,7 @@ function initAutocomplete(){
     origemPlaceId=p.place_id||null;
     setUF('ufOrigem',inferirUF(p.formatted_address||''));
     atualizarIcms();
-    cachedRoute=null;
+    invalidarRotaCache();
   });
   const acD=new google.maps.places.Autocomplete(document.getElementById('destino'),opts);
   acD.addListener('place_changed',()=>{
@@ -1387,10 +1395,34 @@ function initAutocomplete(){
     destinoPlaceId=p.place_id||null;
     setUF('ufDestino',inferirUF(p.formatted_address||''));
     atualizarIcms();
-    cachedRoute=null;
+    invalidarRotaCache();
   });
-  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;cachedRoute=null;});
-  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;cachedRoute=null;});
+  document.getElementById('origem').addEventListener('input',()=>{origemPlaceId=null;invalidarRotaCache();});
+  document.getElementById('destino').addEventListener('input',()=>{destinoPlaceId=null;invalidarRotaCache();});
+}
+
+function invalidarRotaCache(){
+  cachedRoute=null;
+  pedagioEixoEditadoManualmente=false;
+  pedagioTotalEditadoManualmente=false;
+  const hint=document.getElementById('pedagioAutoHint');
+  if(hint) hint.textContent='';
+}
+
+function aplicarPedagioAutomatico(pedagioEstimadoPorEixo){
+  const hint=document.getElementById('pedagioAutoHint');
+  if(pedagioEstimadoPorEixo===null||pedagioEstimadoPorEixo===undefined){
+    if(hint) hint.textContent='⚠ Google não retornou estimativa de pedágio para esta rota — informe manualmente.';
+    return;
+  }
+  const numEixosAtual=parseInt(document.getElementById('numEixos').value)||1;
+  if(pedagioMode==='eixo'&&!pedagioEixoEditadoManualmente){
+    document.getElementById('pedagioEixo').value=brl(pedagioEstimadoPorEixo);
+  }
+  if(pedagioMode==='total'&&!pedagioTotalEditadoManualmente){
+    document.getElementById('pedagioTotalInput').value=brl(pedagioEstimadoPorEixo*numEixosAtual);
+  }
+  if(hint) hint.textContent='🔄 Estimativa automática (Google Routes) — edite se necessário.';
 }
 
 async function getRoute(){
@@ -1403,8 +1435,12 @@ async function getRoute(){
   const destinoCoords=parseCoordenadas(destinoTxt);
   const res=await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`,{
     method:'POST',
-    headers:{'Content-Type':'application/json','X-Goog-FieldMask':'routes.distanceMeters,routes.duration'},
-    body:JSON.stringify({origin,destination,travelMode:'DRIVE',routingPreference:'TRAFFIC_UNAWARE',units:'METRIC'})
+    headers:{'Content-Type':'application/json','X-Goog-FieldMask':'routes.distanceMeters,routes.duration,routes.travelAdvisory.tollInfo'},
+    body:JSON.stringify({
+      origin,destination,travelMode:'DRIVE',routingPreference:'TRAFFIC_UNAWARE',units:'METRIC',
+      extraComputations:['TOLLS'],
+      routeModifiers:{vehicleInfo:{emissionType:'DIESEL'}}
+    })
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('Google Routes: '+(e?.error?.message||`Erro ${res.status}`));}
   const data=await res.json();
@@ -1412,7 +1448,17 @@ async function getRoute(){
   const r=data.routes[0];
   const origemLabel=origemCoords?`${origemCoords.latitude.toFixed(4)}, ${origemCoords.longitude.toFixed(4)}`:origemTxt.split(',')[0];
   const destinoLabel=destinoCoords?`${destinoCoords.latitude.toFixed(4)}, ${destinoCoords.longitude.toFixed(4)}`:destinoTxt.split(',')[0];
-  cachedRoute={km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s','')),origemLabel,destinoLabel};
+
+  // Estimativa de pedágio: a tarifa retornada pelo Google (veículo categoria básica)
+  // já equivale à tarifa por eixo praticada nas praças — sem necessidade de conversão.
+  let pedagioEstimadoPorEixo=null;
+  const precos=r.travelAdvisory?.tollInfo?.estimatedPrice;
+  if(precos&&precos.length){
+    const brlPrice=precos.find(p=>p.currencyCode==='BRL')||precos[0];
+    pedagioEstimadoPorEixo=Number(brlPrice.units||0)+Number(brlPrice.nanos||0)/1e9;
+  }
+
+  cachedRoute={km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s','')),origemLabel,destinoLabel,pedagioEstimadoPorEixo};
   return cachedRoute;
 }
 
@@ -1741,7 +1787,8 @@ async function calcular(){
   btn.innerHTML='<span class="spinner"></span> Calculando...';
 
   try{
-    const {km,durSec,origemLabel,destinoLabel}=await getRoute();
+    const {km,durSec,origemLabel,destinoLabel,pedagioEstimadoPorEixo}=await getRoute();
+    aplicarPedagioAutomatico(pedagioEstimadoPorEixo);
 
     const numEixos=parseInt(document.getElementById('numEixos').value);
     const pesoEmb=parseBR(document.getElementById('pesoEmb').value)||CAPACIDADE[numEixos]||30;

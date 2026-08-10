@@ -17,5 +17,24 @@
     "consVazio": "2,3",
     "velMedia": "70",
     "tempoMode": "api"
+  },
+  "op_1786314860228": {
+    "nome": "Bobinas de papel (sider)",
+    "cvCredito": "R$ 1,30",
+    "cvSemCredito": "R$ 0,05",
+    "cfCredito": "R$ 4.862,83",
+    "cfSemCredito": "R$ 4.037,93",
+    "diasUteis": "21",
+    "horasDia": "11",
+    "horasCarga": "2",
+    "horasDescarga": "2",
+    "ociosidade": "15,0%",
+    "comissao": "12,0%",
+    "piscofinsPct": "9,25%",
+    "combLitro": "R$ 7,80",
+    "consCarreg": "2,1",
+    "consVazio": "2,8",
+    "velMedia": "70",
+    "tempoMode": "api"
   }
 }
