@@ -312,12 +312,30 @@ select { cursor: pointer; }
   <div class="divider"></div>
   <div class="section-label">Veículo e carga</div>
   <div class="field-group">
-    <label>Veículo/implemento cadastrado (opcional)</label>
+    <label>Veículo/implemento</label>
     <select id="selectVeiculoCotacao" onchange="selecionarVeiculo(this.value)">
-      <option value="">— seleção manual de eixos/peso —</option>
+      <option value="__manual__">Definir manualmente (eixos/peso)</option>
     </select>
   </div>
   <div class="op-select-hint" id="veiculoSelectHint" style="margin-bottom:.6rem;"></div>
+  <div class="grid-2" id="camposManualEixosPeso">
+    <div class="field-group">
+      <label>Nº de eixos carregados</label>
+      <select id="numEixos" onchange="atualizarPeso()">
+        <option value="2">2 eixos</option>
+        <option value="3">3 eixos</option>
+        <option value="4">4 eixos</option>
+        <option value="5">5 eixos</option>
+        <option value="6" selected>6 eixos</option>
+        <option value="7">7 eixos</option>
+        <option value="9">9 eixos</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Peso embarcado (t)</label>
+      <input type="text" id="pesoEmb" value="30" />
+    </div>
+  </div>
   <div class="grid-2">
     <div class="field-group">
       <label>Tipo de carga</label>
@@ -331,24 +349,6 @@ select { cursor: pointer; }
         <option value="perigosaGranel">Perigosa (granel sólido)</option>
         <option value="perigosaGeral">Perigosa (carga geral)</option>
       </select>
-    </div>
-    <div class="field-group">
-      <label>Nº de eixos carregados</label>
-      <select id="numEixos" onchange="atualizarPeso();limparSelecaoVeiculo();">
-        <option value="2">2 eixos (Toco)</option>
-        <option value="3">3 eixos (Truck)</option>
-        <option value="4">4 eixos</option>
-        <option value="5">5 eixos (Carreta simples)</option>
-        <option value="6" selected>6 eixos (Bi-trem / Carreta)</option>
-        <option value="7">7 eixos (Bi-trem longo)</option>
-        <option value="9">9 eixos (Rodotrem)</option>
-      </select>
-    </div>
-  </div>
-  <div class="grid-2">
-    <div class="field-group">
-      <label>Peso embarcado (t)</label>
-      <input type="text" id="pesoEmb" value="30" oninput="limparSelecaoVeiculo()" />
     </div>
     <div class="field-group">
       <label>ICMS (%)</label>
@@ -648,13 +648,13 @@ select { cursor: pointer; }
       <div class="field-group">
         <label>Nº de eixos</label>
         <select id="veiculoNumEixos">
-          <option value="2">2 eixos (Toco)</option>
-          <option value="3">3 eixos (Truck)</option>
+          <option value="2">2 eixos</option>
+          <option value="3">3 eixos</option>
           <option value="4">4 eixos</option>
-          <option value="5" selected>5 eixos (Carreta simples)</option>
-          <option value="6">6 eixos (Bi-trem / Carreta)</option>
-          <option value="7">7 eixos (Bi-trem longo)</option>
-          <option value="9">9 eixos (Rodotrem)</option>
+          <option value="5">5 eixos</option>
+          <option value="6" selected>6 eixos</option>
+          <option value="7">7 eixos</option>
+          <option value="9">9 eixos</option>
         </select>
       </div>
       <div class="field-group">
@@ -1318,27 +1318,32 @@ function renderBannerPublicacaoVeiculos(){
 function popularSelectVeiculos(){
   const sel=document.getElementById('selectVeiculoCotacao');
   const atual=sel.value;
-  sel.innerHTML='<option value="">— seleção manual de eixos/peso —</option>';
+  sel.innerHTML='<option value="__manual__">Definir manualmente (eixos/peso)</option>';
   Object.keys(veiculos).forEach(id=>{
     const opt=document.createElement('option');
     opt.value=id; opt.textContent=`${veiculos[id].nome} — ${veiculos[id].numEixos} eixos, ${veiculos[id].pesoEmb} t`;
     sel.appendChild(opt);
   });
-  sel.value=veiculos[atual]?atual:veiculoAtualId;
+  sel.value=veiculos[atual]?atual:(veiculos[veiculoAtualId]?veiculoAtualId:'__manual__');
 }
 
 function selecionarVeiculo(id){
-  veiculoAtualId=id;
-  localStorage.setItem(VEICULO_ATUAL_STORAGE_KEY,id);
   const hint=document.getElementById('veiculoSelectHint');
-  if(!id){
+  const camposManual=document.getElementById('camposManualEixosPeso');
+  if(!id||id==='__manual__'){
+    veiculoAtualId='';
+    localStorage.removeItem(VEICULO_ATUAL_STORAGE_KEY);
     if(hint) hint.textContent='';
+    if(camposManual) camposManual.style.display='';
     return;
   }
   const v=veiculos[id]; if(!v) return;
+  veiculoAtualId=id;
+  localStorage.setItem(VEICULO_ATUAL_STORAGE_KEY,id);
   document.getElementById('numEixos').value=v.numEixos;
   document.getElementById('pesoEmb').value=v.pesoEmb;
   if(hint) hint.textContent=`🚛 ${v.nome}: ${v.numEixos} eixos, ${v.pesoEmb} t (peso de balança cadastrado).`;
+  if(camposManual) camposManual.style.display='none';
 }
 
 function renderListaVeiculos(){
@@ -1369,7 +1374,7 @@ function abrirFormNovoVeiculo(){
   document.getElementById('veiculoFormId').value='';
   document.getElementById('veiculoFormTitulo').textContent='Novo veículo/implemento';
   document.getElementById('veiculoNome').value='';
-  document.getElementById('veiculoNumEixos').value='5';
+  document.getElementById('veiculoNumEixos').value='6';
   document.getElementById('veiculoPesoEmb').value='';
   document.getElementById('veiculoFormBox').style.display='block';
   document.getElementById('veiculoNome').focus();
@@ -1418,8 +1423,8 @@ function excluirVeiculo(id){
   delete veiculos[id];
   salvarVeiculosDraft();
   if(veiculoAtualId===id){
-    veiculoAtualId='';
-    localStorage.removeItem(VEICULO_ATUAL_STORAGE_KEY);
+    document.getElementById('selectVeiculoCotacao').value='__manual__';
+    selecionarVeiculo('__manual__');
   }
   popularSelectVeiculos();
   renderListaVeiculos();
@@ -1536,7 +1541,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   await carregarVeiculos();
   popularSelectVeiculos();
-  if(veiculoAtualId) selecionarVeiculo(veiculoAtualId);
+  selecionarVeiculo(document.getElementById('selectVeiculoCotacao').value);
 
   document.getElementById('pedagioEixo').addEventListener('input',()=>{pedagioEixoEditadoManualmente=true;});
   document.getElementById('pedagioTotalInput').addEventListener('input',()=>{pedagioTotalEditadoManualmente=true;});
@@ -1597,15 +1602,6 @@ function setTempoMode(m){
 function atualizarPeso(){
   const e=parseInt(document.getElementById('numEixos').value);
   const c=CAPACIDADE[e]; if(c) document.getElementById('pesoEmb').value=c;
-}
-
-function limparSelecaoVeiculo(){
-  veiculoAtualId='';
-  localStorage.removeItem(VEICULO_ATUAL_STORAGE_KEY);
-  const sel=document.getElementById('selectVeiculoCotacao');
-  if(sel) sel.value='';
-  const hint=document.getElementById('veiculoSelectHint');
-  if(hint) hint.textContent='';
 }
 
 function inferirUF(txt){
