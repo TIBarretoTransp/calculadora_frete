@@ -1,0 +1,7 @@
+{
+  "v_vanderleia": { "nome": "Vanderléia (6 eixos c/ trucado)", "numEixos": "6", "pesoEmb": "34" },
+  "v_ls": { "nome": "LS (6 eixos c/ trucado)", "numEixos": "6", "pesoEmb": "30" },
+  "v_quarto_eixo": { "nome": "Quarto eixo (7 eixos c/ trucado)", "numEixos": "7", "pesoEmb": "38" },
+  "v_bitrem": { "nome": "Bitrem (7 eixos c/ trucado)", "numEixos": "7", "pesoEmb": "36" },
+  "v_rodotrem": { "nome": "Rodotrem (9 eixos c/ trucado)", "numEixos": "9", "pesoEmb": "50" }
+}

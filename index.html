@@ -260,7 +260,7 @@ select { cursor: pointer; }
 <!-- ABAS: COTAÇÃO primeiro, OPERAÇÕES DE CUSTO segundo -->
 <div class="main-tabs">
   <button class="main-tab active" id="mtCotacao" onclick="showMain('cotacao')">🚛 Cotação</button>
-  <button class="main-tab" id="mtOperacoes" onclick="showMain('operacoes')">📋 Operações de custo</button>
+  <button class="main-tab" id="mtOperacoes" onclick="showMain('operacoes')">📋 Custo das operações</button>
 </div>
 
 <!-- COTAÇÃO -->
@@ -311,6 +311,13 @@ select { cursor: pointer; }
 
   <div class="divider"></div>
   <div class="section-label">Veículo e carga</div>
+  <div class="field-group">
+    <label>Veículo/implemento cadastrado (opcional)</label>
+    <select id="selectVeiculoCotacao" onchange="selecionarVeiculo(this.value)">
+      <option value="">— seleção manual de eixos/peso —</option>
+    </select>
+  </div>
+  <div class="op-select-hint" id="veiculoSelectHint" style="margin-bottom:.6rem;"></div>
   <div class="grid-2">
     <div class="field-group">
       <label>Tipo de carga</label>
@@ -327,7 +334,7 @@ select { cursor: pointer; }
     </div>
     <div class="field-group">
       <label>Nº de eixos carregados</label>
-      <select id="numEixos" onchange="atualizarPeso()">
+      <select id="numEixos" onchange="atualizarPeso();limparSelecaoVeiculo();">
         <option value="2">2 eixos (Toco)</option>
         <option value="3">3 eixos (Truck)</option>
         <option value="4">4 eixos</option>
@@ -341,7 +348,7 @@ select { cursor: pointer; }
   <div class="grid-2">
     <div class="field-group">
       <label>Peso embarcado (t)</label>
-      <input type="text" id="pesoEmb" value="30" />
+      <input type="text" id="pesoEmb" value="30" oninput="limparSelecaoVeiculo()" />
     </div>
     <div class="field-group">
       <label>ICMS (%)</label>
@@ -498,7 +505,7 @@ select { cursor: pointer; }
 <!-- OPERAÇÕES DE CUSTO -->
 <div class="main-panel" id="panelOperacoes">
   <div class="op-topbar">
-    <div class="section-label" style="margin-bottom:0;">Operações de custo cadastradas</div>
+    <div class="section-label" style="margin-bottom:0;">Custo das operações cadastradas</div>
     <a class="op-back-link" onclick="showMain('cotacao')">← Voltar</a>
   </div>
   <p style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">
@@ -608,6 +615,56 @@ select { cursor: pointer; }
     <div style="display:flex;gap:8px;margin-top:.4rem;">
       <button class="calc-btn" style="flex:1;" onclick="salvarFormOperacao()">Salvar operação</button>
       <button class="calc-btn" style="flex:1;background:#94a3b8;" onclick="fecharFormOperacao()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="op-topbar">
+    <div class="section-label" style="margin-bottom:0;">🚛 Veículos e implementos cadastrados</div>
+  </div>
+  <p style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">
+    Cadastro independente das operações de custo — um mesmo tipo de carga pode rodar em implementos diferentes
+    (ex.: bobinas de papel num sider hoje, em outro veículo amanhã). Cada veículo/implemento guarda seu peso
+    embarcado real de balança, já que dois implementos com o mesmo número de eixos podem ter capacidades
+    diferentes (espaçamento entre eixos, tara etc.). Na Cotação, escolha o veículo separadamente da operação.
+  </p>
+
+  <div class="op-save-bar" id="veiculoBannerPublicacao"></div>
+
+  <div id="listaVeiculos"></div>
+
+  <button class="op-mini-btn primary" style="margin-top:.4rem;padding:8px 14px;font-size:.78rem;" onclick="abrirFormNovoVeiculo()">+ Novo veículo/implemento</button>
+
+  <div class="op-form-box" id="veiculoFormBox" style="display:none;margin-top:1rem;">
+    <div class="op-form-title" id="veiculoFormTitulo">Novo veículo/implemento</div>
+    <input type="hidden" id="veiculoFormId" value="" />
+    <div class="grid-2">
+      <div class="field-group" style="grid-column:1/-1;">
+        <label>Nome do veículo/implemento</label>
+        <input type="text" id="veiculoNome" placeholder="Ex.: Sider Vanderléia (frota própria), Bitrem graneleiro..." />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Nº de eixos</label>
+        <select id="veiculoNumEixos">
+          <option value="2">2 eixos (Toco)</option>
+          <option value="3">3 eixos (Truck)</option>
+          <option value="4">4 eixos</option>
+          <option value="5" selected>5 eixos (Carreta simples)</option>
+          <option value="6">6 eixos (Bi-trem / Carreta)</option>
+          <option value="7">7 eixos (Bi-trem longo)</option>
+          <option value="9">9 eixos (Rodotrem)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Peso embarcado real (t) — balança</label>
+        <input type="text" id="veiculoPesoEmb" placeholder="Ex.: 34" />
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:.4rem;">
+      <button class="calc-btn" style="flex:1;" onclick="salvarFormVeiculo()">Salvar veículo</button>
+      <button class="calc-btn" style="flex:1;background:#94a3b8;" onclick="fecharFormVeiculo()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -780,7 +837,7 @@ select { cursor: pointer; }
 <script>
 const GOOGLE_KEY = 'AIzaSyAk_wJ0jAxN4jMJ6BoVB9BoRogVP8otTNQ';
 
-const CAPACIDADE = {2:10,3:14,4:19,5:27,6:30,7:35,9:45};
+const CAPACIDADE = {2:7,3:14,4:19,5:34,6:30,7:35,9:45};
 const EIXOS_LISTA = [2,3,4,5,6,7,9];
 
 // Tabela A — Portaria SUROC nº 4, de 20 de março de 2026 (diesel ref. R$ 7,35/L)
@@ -797,7 +854,7 @@ const TABELA_ANTT = {
 };
 
 const ICMS_TABLE = {
-  SP:{SP:18,MG:12,PR:12,SC:12,RS:12,MS:12,MT:12,GO:12,RJ:12,ES:12,BA:12,PE:12,CE:12,MA:12,PA:12,AM:12,RO:12,TO:12,PI:12,AL:12,SE:12,PB:12,RN:12,AC:12,AP:12,RR:12,DF:12},
+  SP:{SP:12,MG:12,PR:12,SC:12,RS:12,MS:12,MT:12,GO:12,RJ:12,ES:12,BA:12,PE:12,CE:12,MA:12,PA:12,AM:12,RO:12,TO:12,PI:12,AL:12,SE:12,PB:12,RN:12,AC:12,AP:12,RR:12,DF:12},
   MG:{SP:7,MG:18,PR:7,SC:7,RS:7,MS:7,MT:7,GO:7,RJ:12,ES:7,BA:7,PE:7,CE:7,MA:7,PA:7,AM:7,RO:7,TO:7,PI:7,AL:7,SE:7,PB:7,RN:7,AC:7,AP:7,RR:7,DF:7},
   PR:{SP:7,MG:7,PR:19.5,SC:12,RS:12,MS:7,MT:7,GO:7,RJ:12,ES:7,BA:7,PE:7,CE:7,MA:7,PA:7,AM:7,RO:7,TO:12,PI:7,AL:7,SE:7,PB:7,RN:7,AC:7,AP:7,RR:7,DF:7},
   MS:{SP:12,MG:12,PR:12,SC:12,RS:12,MS:17,MT:12,GO:12,RJ:12,ES:12,BA:12,PE:12,CE:12,MA:12,PA:12,AM:12,RO:12,TO:12,PI:12,AL:12,SE:12,PB:12,RN:12,AC:12,AP:12,RR:12,DF:12},
@@ -937,7 +994,7 @@ function renderBannerPublicacao(){
       el.className='op-save-bar op-banner-warn';
       el.innerHTML=`<div class="op-save-bar-text">⚠ Não foi possível carregar <strong>operacoes.json</strong> do repositório (rodando fora do GitHub Pages, ou arquivo ainda não publicado). Usando cadastro padrão local, não compartilhado.</div>`;
     }
-    if(hint) hint.innerHTML='⚠ Cadastro de custos não sincronizado com a equipe — veja "Operações de custo".';
+    if(hint) hint.innerHTML='⚠ Cadastro de custos não sincronizado com a equipe — veja "Custo das operações".';
   } else if(temAlteracoesNaoPublicadas){
     if(el){
       el.className='op-save-bar op-banner-pending';
@@ -1145,6 +1202,229 @@ function excluirOperacao(id){
   renderListaOperacoes();
 }
 
+// ── Veículos e implementos (cadastro independente das operações) ──
+const VEICULOS_JSON_URL='./veiculos.json';
+const VEICULOS_DRAFT_KEY='barreto_veiculos_draft_v1';
+const VEICULO_ATUAL_STORAGE_KEY='barreto_veiculo_atual_v1';
+let veiculos={};
+let veiculoAtualId='';
+let veiculosPublicadosStr='';
+let temAlteracoesVeiculosNaoPublicadas=false;
+let origemDadosVeiculos='publicado';
+
+function veiculosFallback(){
+  return {
+    v_vanderleia:{nome:'Vanderléia (6 eixos c/ trucado)',numEixos:'6',pesoEmb:'34'},
+    v_ls:{nome:'LS (6 eixos c/ trucado)',numEixos:'6',pesoEmb:'30'},
+    v_quarto_eixo:{nome:'Quarto eixo (7 eixos c/ trucado)',numEixos:'7',pesoEmb:'38'},
+    v_bitrem:{nome:'Bitrem (7 eixos c/ trucado)',numEixos:'7',pesoEmb:'36'},
+    v_rodotrem:{nome:'Rodotrem (9 eixos c/ trucado)',numEixos:'9',pesoEmb:'50'}
+  };
+}
+
+async function buscarVeiculosPublicados(){
+  const res=await fetch(VEICULOS_JSON_URL,{cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.json();
+}
+
+async function carregarVeiculos(){
+  let publicados=null;
+  try{
+    publicados=await buscarVeiculosPublicados();
+    if(!publicados||Object.keys(publicados).length===0) throw new Error('JSON vazio');
+    veiculosPublicadosStr=JSON.stringify(publicados);
+  }catch(e){
+    console.warn('Não foi possível carregar veiculos.json — usando padrão local.',e);
+    publicados=veiculosFallback();
+    veiculosPublicadosStr=JSON.stringify(publicados);
+    origemDadosVeiculos='fallback';
+  }
+
+  let draft=null;
+  try{
+    const raw=localStorage.getItem(VEICULOS_DRAFT_KEY);
+    draft=raw?JSON.parse(raw):null;
+  }catch(e){ draft=null; }
+
+  if(draft && JSON.stringify(draft)!==veiculosPublicadosStr){
+    veiculos=draft;
+    temAlteracoesVeiculosNaoPublicadas=true;
+    if(origemDadosVeiculos!=='fallback') origemDadosVeiculos='draft';
+  } else {
+    veiculos=JSON.parse(JSON.stringify(publicados));
+    temAlteracoesVeiculosNaoPublicadas=false;
+    localStorage.removeItem(VEICULOS_DRAFT_KEY);
+  }
+
+  veiculoAtualId=localStorage.getItem(VEICULO_ATUAL_STORAGE_KEY)||'';
+  if(veiculoAtualId&&!veiculos[veiculoAtualId]) veiculoAtualId='';
+}
+
+function salvarVeiculosDraft(){
+  temAlteracoesVeiculosNaoPublicadas=JSON.stringify(veiculos)!==veiculosPublicadosStr;
+  if(temAlteracoesVeiculosNaoPublicadas){
+    localStorage.setItem(VEICULOS_DRAFT_KEY,JSON.stringify(veiculos));
+  } else {
+    localStorage.removeItem(VEICULOS_DRAFT_KEY);
+  }
+  renderBannerPublicacaoVeiculos();
+}
+
+function baixarVeiculosJson(){
+  const blob=new Blob([JSON.stringify(veiculos,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='veiculos.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  veiculosPublicadosStr=JSON.stringify(veiculos);
+  temAlteracoesVeiculosNaoPublicadas=false;
+  localStorage.removeItem(VEICULOS_DRAFT_KEY);
+  origemDadosVeiculos='publicado';
+  renderBannerPublicacaoVeiculos();
+}
+
+async function recarregarVeiculosPublicados(){
+  if(temAlteracoesVeiculosNaoPublicadas){
+    if(!confirm('Isso descarta as alterações locais não publicadas e recarrega o cadastro do veiculos.json. Continuar?')) return;
+  }
+  localStorage.removeItem(VEICULOS_DRAFT_KEY);
+  await carregarVeiculos();
+  popularSelectVeiculos();
+  renderListaVeiculos();
+}
+
+function renderBannerPublicacaoVeiculos(){
+  const el=document.getElementById('veiculoBannerPublicacao');
+  if(!el) return;
+  if(origemDadosVeiculos==='fallback'){
+    el.className='op-save-bar op-banner-warn';
+    el.innerHTML=`<div class="op-save-bar-text">⚠ Não foi possível carregar <strong>veiculos.json</strong> do repositório. Usando cadastro padrão local, não compartilhado.</div>`;
+  } else if(temAlteracoesVeiculosNaoPublicadas){
+    el.className='op-save-bar op-banner-pending';
+    el.innerHTML=`<div class="op-save-bar-text">🟡 Há alterações neste navegador que ainda não foram publicadas para a equipe.</div>
+      <div style="display:flex;gap:6px;">
+        <button class="op-mini-btn primary" onclick="baixarVeiculosJson()">⬇ Baixar veiculos.json</button>
+        <button class="op-mini-btn" onclick="recarregarVeiculosPublicados()">↺ Descartar e recarregar</button>
+      </div>`;
+  } else {
+    el.className='op-save-bar op-banner-ok';
+    el.innerHTML=`<div class="op-save-bar-text">🟢 Sincronizado com o cadastro publicado da equipe.</div>
+      <button class="op-mini-btn" onclick="recarregarVeiculosPublicados()">↺ Recarregar</button>`;
+  }
+}
+
+function popularSelectVeiculos(){
+  const sel=document.getElementById('selectVeiculoCotacao');
+  const atual=sel.value;
+  sel.innerHTML='<option value="">— seleção manual de eixos/peso —</option>';
+  Object.keys(veiculos).forEach(id=>{
+    const opt=document.createElement('option');
+    opt.value=id; opt.textContent=`${veiculos[id].nome} — ${veiculos[id].numEixos} eixos, ${veiculos[id].pesoEmb} t`;
+    sel.appendChild(opt);
+  });
+  sel.value=veiculos[atual]?atual:veiculoAtualId;
+}
+
+function selecionarVeiculo(id){
+  veiculoAtualId=id;
+  localStorage.setItem(VEICULO_ATUAL_STORAGE_KEY,id);
+  const hint=document.getElementById('veiculoSelectHint');
+  if(!id){
+    if(hint) hint.textContent='';
+    return;
+  }
+  const v=veiculos[id]; if(!v) return;
+  document.getElementById('numEixos').value=v.numEixos;
+  document.getElementById('pesoEmb').value=v.pesoEmb;
+  if(hint) hint.textContent=`🚛 ${v.nome}: ${v.numEixos} eixos, ${v.pesoEmb} t (peso de balança cadastrado).`;
+}
+
+function renderListaVeiculos(){
+  renderBannerPublicacaoVeiculos();
+  const wrap=document.getElementById('listaVeiculos');
+  wrap.innerHTML='';
+  Object.keys(veiculos).forEach(id=>{
+    const v=veiculos[id];
+    const ativo=id===veiculoAtualId;
+    const card=document.createElement('div');
+    card.className='op-card'+(ativo?' op-ativa':'');
+    card.innerHTML=`
+      <div class="op-card-head">
+        <div class="op-card-nome">${v.nome} ${ativo?'<span class="op-tag-ativa">Em uso na cotação</span>':''}</div>
+      </div>
+      <div class="op-card-resumo">${v.numEixos} eixos · ${v.pesoEmb} t (peso embarcado de balança)</div>
+      <div class="op-card-actions">
+        ${ativo?'':'<button class="op-mini-btn primary" onclick="selecionarVeiculo(\''+id+'\');renderListaVeiculos();">Usar na cotação</button>'}
+        <button class="op-mini-btn" onclick="abrirFormEditarVeiculo('${id}')">Editar</button>
+        <button class="op-mini-btn" onclick="duplicarVeiculo('${id}')">Duplicar</button>
+        <button class="op-mini-btn danger" onclick="excluirVeiculo('${id}')">Excluir</button>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+
+function abrirFormNovoVeiculo(){
+  document.getElementById('veiculoFormId').value='';
+  document.getElementById('veiculoFormTitulo').textContent='Novo veículo/implemento';
+  document.getElementById('veiculoNome').value='';
+  document.getElementById('veiculoNumEixos').value='5';
+  document.getElementById('veiculoPesoEmb').value='';
+  document.getElementById('veiculoFormBox').style.display='block';
+  document.getElementById('veiculoNome').focus();
+}
+
+function abrirFormEditarVeiculo(id){
+  const v=veiculos[id]; if(!v) return;
+  document.getElementById('veiculoFormId').value=id;
+  document.getElementById('veiculoFormTitulo').textContent='Editar veículo/implemento';
+  document.getElementById('veiculoNome').value=v.nome;
+  document.getElementById('veiculoNumEixos').value=v.numEixos;
+  document.getElementById('veiculoPesoEmb').value=v.pesoEmb;
+  document.getElementById('veiculoFormBox').style.display='block';
+  document.getElementById('veiculoFormBox').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function fecharFormVeiculo(){
+  document.getElementById('veiculoFormBox').style.display='none';
+}
+
+function salvarFormVeiculo(){
+  const nome=document.getElementById('veiculoNome').value.trim();
+  if(!nome){ alert('Informe um nome para o veículo/implemento.'); return; }
+  const pesoEmb=document.getElementById('veiculoPesoEmb').value.trim();
+  if(!pesoEmb){ alert('Informe o peso embarcado (t).'); return; }
+  const id=document.getElementById('veiculoFormId').value||('v_'+Date.now());
+  veiculos[id]={nome,numEixos:document.getElementById('veiculoNumEixos').value,pesoEmb};
+  salvarVeiculosDraft();
+  fecharFormVeiculo();
+  popularSelectVeiculos();
+  renderListaVeiculos();
+  if(id===veiculoAtualId) selecionarVeiculo(id);
+}
+
+function duplicarVeiculo(id){
+  const v=veiculos[id]; if(!v) return;
+  const novoId='v_'+Date.now();
+  veiculos[novoId]={...v,nome:v.nome+' (cópia)'};
+  salvarVeiculosDraft();
+  popularSelectVeiculos();
+  renderListaVeiculos();
+}
+
+function excluirVeiculo(id){
+  if(!confirm('Excluir o veículo/implemento "'+veiculos[id].nome+'"? Essa ação não pode ser desfeita.')) return;
+  delete veiculos[id];
+  salvarVeiculosDraft();
+  if(veiculoAtualId===id){
+    veiculoAtualId='';
+    localStorage.removeItem(VEICULO_ATUAL_STORAGE_KEY);
+  }
+  popularSelectVeiculos();
+  renderListaVeiculos();
+}
+
 // ── Helpers ──
 function parseBR(v){
   const s=(v||'0').toString().replace(/R\$\s*/g,'').replace(/%/g,'').replace(/\./g,'').replace(',','.');
@@ -1181,18 +1461,26 @@ function aplicarMascaraBRL(id){
   });
 }
 
-// Máscara percentual %
+// Máscara percentual % — digitação livre, formata ao sair do campo
 function aplicarMascaraPCT(id){
   const el=document.getElementById(id); if(!el) return;
+  el.addEventListener('focus',function(){
+    this.value=this.value.replace('%','').trim();
+  });
   el.addEventListener('input',function(){
-    let d=this.value.replace(/\D/g,'');
-    if(!d){this.value='';return;}
-    const val=parseInt(d,10)/100;
-    this.value=val.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2})+'%';
+    let v=this.value.replace(/[^0-9,]/g,'');
+    const partes=v.split(',');
+    if(partes.length>2) v=partes[0]+','+partes.slice(1).join('');
+    this.value=v;
+  });
+  el.addEventListener('blur',function(){
+    if(this.value.trim()===''){ this.value=''; return; }
+    const num=parseBR(this.value);
+    this.value=num.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2})+'%';
   });
   el.addEventListener('keydown',function(e){
-    const ok=['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
-    if(!ok.includes(e.key)&&!/^\d$/.test(e.key)) e.preventDefault();
+    const ok=['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter'];
+    if(!ok.includes(e.key)&&!/^[\d,]$/.test(e.key)) e.preventDefault();
   });
 }
 
@@ -1246,17 +1534,25 @@ document.addEventListener('DOMContentLoaded',async()=>{
   aplicarOperacaoAosCampos(operacaoAtualId);
   renderBannerPublicacao();
 
+  await carregarVeiculos();
+  popularSelectVeiculos();
+  if(veiculoAtualId) selecionarVeiculo(veiculoAtualId);
+
   document.getElementById('pedagioEixo').addEventListener('input',()=>{pedagioEixoEditadoManualmente=true;});
   document.getElementById('pedagioTotalInput').addEventListener('input',()=>{pedagioTotalEditadoManualmente=true;});
 });
 
 // ── UI ──
+let temResultadoCalculado=false;
+
 function showMain(tab){
   document.getElementById('panelCotacao').classList.toggle('active',tab==='cotacao');
   document.getElementById('panelOperacoes').classList.toggle('active',tab==='operacoes');
   document.getElementById('mtCotacao').classList.toggle('active',tab==='cotacao');
   document.getElementById('mtOperacoes').classList.toggle('active',tab==='operacoes');
-  if(tab==='operacoes') renderListaOperacoes();
+  const rw=document.getElementById('resultWrapper');
+  rw.style.display=(tab==='cotacao'&&temResultadoCalculado)?'block':'none';
+  if(tab==='operacoes'){ renderListaOperacoes(); renderListaVeiculos(); }
 }
 
 function showResult(tab){
@@ -1301,6 +1597,15 @@ function setTempoMode(m){
 function atualizarPeso(){
   const e=parseInt(document.getElementById('numEixos').value);
   const c=CAPACIDADE[e]; if(c) document.getElementById('pesoEmb').value=c;
+}
+
+function limparSelecaoVeiculo(){
+  veiculoAtualId='';
+  localStorage.removeItem(VEICULO_ATUAL_STORAGE_KEY);
+  const sel=document.getElementById('selectVeiculoCotacao');
+  if(sel) sel.value='';
+  const hint=document.getElementById('veiculoSelectHint');
+  if(hint) hint.textContent='';
 }
 
 function inferirUF(txt){
@@ -1524,7 +1829,10 @@ function calcularPreco(km, durSec, retVazioFrac, params){
   const icmsVal = receitaComIcms-receitaBase;
   const pedagioNoFaturamento = pedagioTipoParam==='vpo'?pedagioVolta:(pedagio+pedagioVolta);
   const custoOpTotal = custoOp+pedagioNoFaturamento;
-  const lucro = receitaComIcms-custoOpTotal-impostosFat-comissao-icmsVal;
+  // O preço foi calculado sobre o custo líquido (já descontado o crédito de PIS/COFINS).
+  // Para o lucro realizado bater com a margem-alvo, o crédito precisa ser somado de volta aqui
+  // (senão ele é descontado do custo na precificação e "descontado de novo" implicitamente no lucro).
+  const lucro = receitaComIcms-custoOpTotal-impostosFat+creditoPC-comissao-icmsVal;
   const margemReal = lucro/receitaComIcms;
 
   return {precTon,pedagioTon,precTonTotal:precTon+pedagioTon,
@@ -1846,7 +2154,7 @@ async function calcular(){
 
     // Piso ANTT
     document.getElementById('rDistKm').textContent=km.toLocaleString('pt-BR');
-    document.getElementById('rDuracao').textContent=formatDur(durSec);
+    document.getElementById('rDuracao').textContent=formatHoras(calc.tIda);
     document.getElementById('rTempoOp').textContent=formatHoras(tOpH);
 
     if(coef){
@@ -1886,6 +2194,7 @@ async function calcular(){
     renderSensibilidade(km,durSec,params,cenario.pct);
 
     rw.style.display='block';
+    temResultadoCalculado=true;
     showResult('prec');
 
   } catch(e){ mostrarErro(e.message); }
