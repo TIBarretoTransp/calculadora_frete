@@ -214,6 +214,13 @@ select { cursor: pointer; }
 .op-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
 .op-back-link { font-size: .78rem; color: #6b7280; text-decoration: none; font-weight: 600; cursor: pointer; }
 .op-back-link:hover { color: #2563eb; }
+.lote-link-row { text-align: right; margin: .4rem .2rem .9rem; }
+.lote-link { font-size: .68rem; color: #9ca3af; text-decoration: none; cursor: pointer; }
+.lote-link:hover { color: #2563eb; }
+.lote-textarea { width: 100%; min-height: 140px; resize: vertical; font-family: 'Consolas','Courier New',monospace; font-size: .78rem; padding: .6rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; color: #111827; }
+.lote-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: .8rem; }
+.lote-table th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: #9ca3af; padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
+.lote-table td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; }
 
 /* Cards de operação */
 .op-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: .9rem 1rem; margin-bottom: .7rem; }
@@ -262,6 +269,7 @@ select { cursor: pointer; }
   <button class="main-tab active" id="mtCotacao" onclick="showMain('cotacao')">🚛 Cotação</button>
   <button class="main-tab" id="mtOperacoes" onclick="showMain('operacoes')">📋 Custo das operações</button>
 </div>
+<div class="lote-link-row"><a class="lote-link" onclick="showMain('lote')">🔁 calcular várias rotas de uma vez</a></div>
 
 <!-- COTAÇÃO -->
 <div class="main-panel active" id="panelCotacao">
@@ -685,6 +693,34 @@ select { cursor: pointer; }
       <button class="calc-btn" style="flex:1;" onclick="salvarFormVeiculo()">Salvar veículo</button>
       <button class="calc-btn" style="flex:1;background:#94a3b8;" onclick="fecharFormVeiculo()">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<!-- CALCULAR EM LOTE (só distância/tempo via Google Routes, sem pedágio e sem precificação) -->
+<div class="main-panel" id="panelLote">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;">
+    <div class="section-label" style="margin-bottom:0;">🔁 Calcular várias rotas de uma vez</div>
+    <a class="op-back-link" onclick="showMain('cotacao')">← Voltar</a>
+  </div>
+  <p style="font-size:.78rem;color:#6b7280;margin-bottom:.7rem;line-height:1.5;">
+    Cole uma rota por linha. Aceita o formato copiado direto de planilha
+    (<code>ORIGEM&nbsp;&nbsp;UF&nbsp;&nbsp;DESTINO&nbsp;&nbsp;UF</code>, separado por TAB) ou
+    <code>Cidade, UF -&gt; Cidade, UF</code>. Uma eventual linha de cabeçalho é ignorada automaticamente.
+    Esse modo busca distância, tempo e pedágio estimado por eixo (sem calcular preço/margem).
+  </p>
+  <textarea class="lote-textarea" id="loteInput" placeholder="Senges, PR -> Araucaria, PR
+Ponta Grossa, PR -> Carapicuiba, SP
+Jarinu, SP -> Carambei, PR"></textarea>
+  <div style="display:flex;gap:8px;margin-top:.7rem;">
+    <button class="calc-btn" id="btnLote" style="flex:1;" onclick="calcularLote()">Calcular distâncias</button>
+    <button class="calc-btn" id="btnCopiarLote" style="flex:0 0 auto;background:#475569;" onclick="copiarLoteResultados()">Copiar resultado</button>
+  </div>
+  <p id="loteStatus" style="font-size:.78rem;color:#6b7280;margin-top:.6rem;min-height:1.1em;"></p>
+  <div id="loteResultBox" style="display:none;">
+    <table class="lote-table">
+      <thead><tr><th>Origem</th><th>Destino</th><th style="text-align:right;">Distância</th><th style="text-align:right;">Tempo</th><th style="text-align:right;">Pedágio/eixo</th></tr></thead>
+      <tbody id="loteResultBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -1573,6 +1609,7 @@ let temResultadoCalculado=false;
 function showMain(tab){
   document.getElementById('panelCotacao').classList.toggle('active',tab==='cotacao');
   document.getElementById('panelOperacoes').classList.toggle('active',tab==='operacoes');
+  document.getElementById('panelLote').classList.toggle('active',tab==='lote');
   document.getElementById('mtCotacao').classList.toggle('active',tab==='cotacao');
   document.getElementById('mtOperacoes').classList.toggle('active',tab==='operacoes');
   const rw=document.getElementById('resultWrapper');
@@ -1789,6 +1826,128 @@ async function getRoute(){
 
   cachedRoute={km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s','')),origemLabel,destinoLabel,pedagioEstimadoPorEixo};
   return cachedRoute;
+}
+
+// ── Lote (várias rotas de uma vez, só distância/tempo) ──
+let cachedLoteResultados=[];
+
+async function buscarDistanciaGenerica(origemTxt,destinoTxt){
+  const origin=buildWaypoint(origemTxt,null);
+  const destination=buildWaypoint(destinoTxt,null);
+  const res=await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEY}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Goog-FieldMask':'routes.distanceMeters,routes.duration,routes.travelAdvisory.tollInfo'},
+    body:JSON.stringify({
+      origin,destination,travelMode:'DRIVE',routingPreference:'TRAFFIC_UNAWARE',units:'METRIC',
+      extraComputations:['TOLLS'],
+      routeModifiers:{vehicleInfo:{emissionType:'DIESEL'}}
+    })
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`Erro ${res.status}`);}
+  const data=await res.json();
+  if(!data.routes?.length) throw new Error('Rota não encontrada.');
+  const r=data.routes[0];
+  // Mesma regra da cotação: a tarifa básica retornada pelo Google já equivale à tarifa por eixo.
+  let pedagioEixo=null;
+  const precos=r.travelAdvisory?.tollInfo?.estimatedPrice;
+  if(precos&&precos.length){
+    const brlPrice=precos.find(p=>p.currencyCode==='BRL')||precos[0];
+    pedagioEixo=Number(brlPrice.units||0)+Number(brlPrice.nanos||0)/1e9;
+  }
+  return {km:Math.round(r.distanceMeters/1000),durSec:parseInt((r.duration||'0s').replace('s','')),pedagioEixo};
+}
+
+function parseLinhasLote(texto){
+  const linhas=texto.split('\n').map(l=>l.trim()).filter(l=>l.length);
+  const rotas=[];
+  for(const linha of linhas){
+    let partes=null;
+    if(linha.includes('\t')) partes=linha.split('\t').map(p=>p.trim()).filter(p=>p.length);
+    else if(linha.includes(';')) partes=linha.split(';').map(p=>p.trim()).filter(p=>p.length);
+
+    let origem,destino;
+    if(partes&&partes.length>=4){
+      origem=`${partes[0]}, ${partes[1]}`;
+      destino=`${partes[2]}, ${partes[3]}`;
+    } else if(partes&&partes.length===2){
+      origem=partes[0]; destino=partes[1];
+    } else {
+      const sep=linha.match(/\s*(->|–>|>|→)\s*/);
+      if(sep){
+        const idx=linha.indexOf(sep[0]);
+        origem=linha.slice(0,idx).trim();
+        destino=linha.slice(idx+sep[0].length).trim();
+      } else continue;
+    }
+    if(/^ORIGEM$/i.test(origem.split(',')[0].trim())) continue; // ignora linha de cabeçalho
+    rotas.push({origem,destino});
+  }
+  return rotas;
+}
+
+function renderLoteResultados(resultados){
+  document.getElementById('loteResultBody').innerHTML=resultados.map(r=>`
+    <tr>
+      <td>${r.origem}</td>
+      <td>${r.destino}</td>
+      <td style="text-align:right;">${r.erro?'—':r.km+' km'}</td>
+      <td style="text-align:right;">${r.erro?`<span style="color:#dc2626;" title="${r.erro.replace(/"/g,'')}">erro</span>`:r.tempo}</td>
+      <td style="text-align:right;">${r.erro?'—':(r.pedagioEixo===null?'sem pedágio':brl(r.pedagioEixo))}</td>
+    </tr>
+  `).join('');
+}
+
+async function calcularLote(){
+  const textarea=document.getElementById('loteInput');
+  const rotas=parseLinhasLote(textarea.value);
+  const btn=document.getElementById('btnLote');
+  const statusEl=document.getElementById('loteStatus');
+  const resultBox=document.getElementById('loteResultBox');
+  if(!rotas.length){
+    statusEl.style.color='#dc2626';
+    statusEl.textContent='Nenhuma rota reconhecida. Verifique o formato (uma rota por linha).';
+    return;
+  }
+  btn.disabled=true;
+  resultBox.style.display='';
+  const resultados=[];
+  cachedLoteResultados=resultados;
+  for(let i=0;i<rotas.length;i++){
+    const rota=rotas[i];
+    statusEl.style.color='#6b7280';
+    statusEl.textContent=`Calculando ${i+1} de ${rotas.length}: ${rota.origem} → ${rota.destino}...`;
+    try{
+      const r=await buscarDistanciaGenerica(rota.origem,rota.destino);
+      resultados.push({...rota,km:r.km,tempo:formatHoras(r.durSec/3600),pedagioEixo:r.pedagioEixo,erro:null});
+    }catch(e){
+      resultados.push({...rota,km:null,tempo:null,erro:e.message});
+    }
+    renderLoteResultados(resultados);
+  }
+  const ok=resultados.filter(r=>!r.erro).length;
+  statusEl.style.color=ok===resultados.length?'#16a34a':'#d97706';
+  statusEl.textContent=`Concluído: ${ok} de ${resultados.length} rota(s) calculada(s)${ok<resultados.length?' — veja os erros na tabela.':'.'}`;
+  btn.disabled=false;
+}
+
+function copiarLoteResultados(){
+  if(!cachedLoteResultados.length) return;
+  const linhas=cachedLoteResultados.map(r=>[
+    r.origem,r.destino,
+    r.erro?'':r.km,
+    r.erro?('erro: '+r.erro):r.tempo,
+    r.erro?'':(r.pedagioEixo===null?'':r.pedagioEixo.toFixed(2).replace('.',','))
+  ].join('\t'));
+  const texto=['Origem\tDestino\tDistância (km)\tTempo\tPedágio por eixo (R$)',...linhas].join('\n');
+  navigator.clipboard.writeText(texto).then(()=>{
+    const btn=document.getElementById('btnCopiarLote');
+    const old=btn.textContent; btn.textContent='Copiado!';
+    setTimeout(()=>{btn.textContent=old;},1500);
+  }).catch(()=>{
+    const statusEl=document.getElementById('loteStatus');
+    statusEl.style.color='#dc2626';
+    statusEl.textContent='Não foi possível copiar automaticamente — selecione a tabela manualmente.';
+  });
 }
 
 // ── Cálculo principal ──

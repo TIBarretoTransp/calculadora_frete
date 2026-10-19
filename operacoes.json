@@ -28,13 +28,13 @@
     "horasDia": "11",
     "horasCarga": "2",
     "horasDescarga": "2",
-    "ociosidade": "15,0%",
+    "ociosidade": "30,0%",
     "comissao": "12,0%",
     "piscofinsPct": "9,25%",
-    "combLitro": "R$ 6,30",
+    "combLitro": "R$ 7,10",
     "consCarreg": "2,1",
     "consVazio": "2,8",
-    "velMedia": "70",
+    "velMedia": "55",
     "tempoMode": "vel"
   }
 }
